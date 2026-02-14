@@ -76,6 +76,26 @@ export function createRouter(dependencies = {}) {
         return;
       }
 
+      if (req.method === "DELETE" && req.url.startsWith("/drafts/")) {
+        const user = auth.authenticate(req.headers.authorization);
+        const draftId = req.url.replace("/drafts/", "");
+        const draft = store.getDraftById(draftId);
+
+        if (!draft) {
+          sendJson(req, res, 404, { error: "Draft not found" });
+          return;
+        }
+
+        if (user.role !== "superuser" && draft.ownerUserId !== user.id) {
+          sendJson(req, res, 403, { error: "Forbidden" });
+          return;
+        }
+
+        store.deleteDraftById(draftId);
+        sendJson(req, res, 200, { deleted: true, id: draftId });
+        return;
+      }
+
       sendJson(req, res, 404, { error: "Not found" });
     } catch (error) {
       sendJson(req, res, 400, { error: error.message });
@@ -92,7 +112,7 @@ function sendJson(req, res, statusCode, payload) {
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": corsOrigin,
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization"
   });
   res.end(body);
@@ -104,7 +124,7 @@ function sendPreflight(req, res) {
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": corsOrigin,
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization"
   });
   // 204 responses must not include a body.

@@ -330,6 +330,22 @@ h1 {
   color: #203166;
 }
 
+.draft-actions {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.danger-button {
+  background: #d93f3f;
+  color: #fff;
+}
+
+.danger-button:hover {
+  background: #bf2f2f;
+}
+
 .form-subtitle {
   grid-column: 1 / -1;
   margin: 0.4rem 0 0;

@@ -13,6 +13,7 @@ const quoteResult = document.getElementById("quoteResult");
 const authForm = document.getElementById("authForm");
 const authStatus = document.getElementById("authStatus");
 const loadDraftsButton = document.getElementById("loadDraftsButton");
+const logoutButton = document.getElementById("logoutButton");
 const saveDraftButton = document.getElementById("saveDraftButton");
 const draftsList = document.getElementById("draftsList");
 let getContractParameters = () => ({});
@@ -98,6 +99,10 @@ loadDraftsButton?.addEventListener("click", async () => {
 
 saveDraftButton?.addEventListener("click", async () => {
   try {
+    if (!ensureAuthenticatedForDraftAction()) {
+      return;
+    }
+
     const payload = buildQuotePayload();
     await saveDraft({
       schemaVersion: "v1",
@@ -110,6 +115,12 @@ saveDraftButton?.addEventListener("click", async () => {
   } catch (error) {
     quoteResult.textContent = `Fehler: ${error.message}`;
   }
+});
+
+logoutButton?.addEventListener("click", () => {
+  localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  authStatus.textContent = "Nicht angemeldet.";
+  draftsList.innerHTML = "";
 });
 
 function buildQuotePayload() {
@@ -276,6 +287,18 @@ function restoreAuthStatus() {
   if (getAuthToken()) {
     authStatus.textContent = "Token vorhanden. Anfragen können geladen werden.";
   }
+}
+
+function ensureAuthenticatedForDraftAction() {
+  if (getAuthToken()) {
+    return true;
+  }
+
+  authStatus.textContent = "Bitte anmelden, um Entwürfe zu speichern.";
+  quoteResult.textContent = "Bitte zuerst anmelden, dann Entwurf erneut speichern.";
+  authForm?.username?.focus();
+  authForm?.scrollIntoView({ behavior: "smooth", block: "center" });
+  return false;
 }
 
 async function saveDraft(draftPayload) {

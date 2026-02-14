@@ -46,6 +46,14 @@ function createMemoryStore() {
     },
     getDraftById(id) {
       return drafts.find((draft) => draft.id === id) || null;
+    },
+    deleteDraftById(id) {
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index === -1) {
+        return false;
+      }
+      drafts.splice(index, 1);
+      return true;
     }
   };
 }
@@ -195,6 +203,21 @@ test("contracts-service supports me endpoint, draft update, and not-found handli
     authorization: `Bearer ${token}`
   });
   assert.equal(notFound.statusCode, 404);
+
+  const deleted = await invokeRoute(router, {
+    method: "DELETE",
+    url: `/drafts/${created.body.id}`,
+    authorization: `Bearer ${token}`
+  });
+  assert.equal(deleted.statusCode, 200);
+  assert.equal(deleted.body.deleted, true);
+
+  const afterDelete = await invokeRoute(router, {
+    method: "GET",
+    url: `/drafts/${created.body.id}`,
+    authorization: `Bearer ${token}`
+  });
+  assert.equal(afterDelete.statusCode, 404);
 });
 
 test("contracts-service handles preflight, invalid JSON and unknown route", async () => {
@@ -203,6 +226,7 @@ test("contracts-service handles preflight, invalid JSON and unknown route", asyn
   const options = await invokeRoute(router, { method: "OPTIONS", url: "/drafts" });
   assert.equal(options.statusCode, 204);
   assert.deepEqual(options.body, {});
+  assert.equal(options.headers["Access-Control-Allow-Methods"], "GET,POST,DELETE,OPTIONS");
 
   const req = Readable.from(["{bad}"]);
   req.method = "POST";
@@ -253,6 +277,39 @@ test("contracts-service handles preflight, invalid JSON and unknown route", asyn
 
   const unknown = await invokeRoute(router, { method: "GET", url: "/unknown" });
   assert.equal(unknown.statusCode, 404);
+});
+
+test("contracts-service prevents deleting drafts from another customer", async () => {
+  const router = createRouter({ store: createMemoryStore() });
+
+  const ownerLogin = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "customer1", password: "customer1" }
+  });
+  const ownerToken = ownerLogin.body.token;
+
+  const created = await invokeRoute(router, {
+    method: "POST",
+    url: "/drafts",
+    authorization: `Bearer ${ownerToken}`,
+    payload: { payload: { v: 1 } }
+  });
+  assert.equal(created.statusCode, 201);
+
+  const otherLogin = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "customer2", password: "customer2" }
+  });
+  const otherToken = otherLogin.body.token;
+
+  const forbiddenDelete = await invokeRoute(router, {
+    method: "DELETE",
+    url: `/drafts/${created.body.id}`,
+    authorization: `Bearer ${otherToken}`
+  });
+  assert.equal(forbiddenDelete.statusCode, 403);
 });
 
 test("contracts-service supports multi-origin and wildcard CORS configuration", async () => {

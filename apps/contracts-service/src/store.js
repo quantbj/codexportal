@@ -84,6 +84,20 @@ export class Store {
   getDraftById(id) {
     return this.drafts.find((draft) => draft.id === id) || null;
   }
+
+  /**
+   * Deletes one draft by id.
+   */
+  deleteDraftById(id) {
+    const index = this.drafts.findIndex((draft) => draft.id === id);
+    if (index === -1) {
+      return false;
+    }
+
+    this.drafts.splice(index, 1);
+    writeJson(this.draftsFile, this.drafts);
+    return true;
+  }
 }
 
 function ensureDataFiles(dataDir, usersFile, draftsFile) {

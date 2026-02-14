@@ -40,6 +40,9 @@ test("Store initializes default users and supports role-filtered draft access", 
   assert.equal(updated.schemaVersion, "v2");
   assert.equal(updated.payload.hello, "updated");
   assert.equal(store.getDraftById(created.id).payload.hello, "updated");
+  assert.equal(store.deleteDraftById(created.id), true);
+  assert.equal(store.getDraftById(created.id), null);
+  assert.equal(store.deleteDraftById("missing"), false);
 });
 
 test("Store falls back when persisted JSON is invalid", async () => {
