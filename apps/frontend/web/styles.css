@@ -89,6 +89,10 @@ body {
   border-color: #f5fff9;
 }
 
+.nav-hidden {
+  display: none;
+}
+
 .kicker {
   text-transform: uppercase;
   letter-spacing: 0.12em;

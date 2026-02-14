@@ -18,10 +18,12 @@
 - server-side validation and deterministic pricing logic
 - no trust in client-calculated values
 - structured error handling without stack trace exposure
-- planned authn/authz and audit logging
+- role-based authn/authz with server-side session checks
+- account password hashing (`scrypt`) and legacy-password migration
+- auth endpoint rate limiting and explicit logout
 
 ## Residual Risks in Current Baseline
 
-- no persistence encryption because storage is in-memory only
-- auth is not yet integrated
-- no anti-automation controls yet (CAPTCHA/rate limits)
+- no CAPTCHA/challenge at signup, only API-side throttling
+- no centralized distributed rate limiting (single-instance in-memory limiter)
+- lockfile + automated dependency scanning still missing from CI execution

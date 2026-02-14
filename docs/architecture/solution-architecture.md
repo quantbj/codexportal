@@ -15,7 +15,7 @@
 - **Frontend Portal**: calculator, quote request, contract process transparency
 - **Sales API**: quote lifecycle, validation, security headers, orchestration
 - **External Pricing Service**: dedicated pricing component called via REST
-- **Contracts Service**: draft persistence + role-based access (`customer`, `superuser`)
+- **Contracts Service**: draft persistence + role-based access (`customer`, `superuser`) + account/signup/admin management
 - **Future Integrations**: CRM, e-sign provider, settlement data source, identity provider
 
 ## Current Implementation Style
@@ -30,6 +30,17 @@
 - Contract parameters split into:
   - `contract-pricing.json` (pricing page)
   - `contract-offer.json` (offer page)
+- Authentication and user lifecycle:
+  - `POST /auth/signup` for first-time customer account creation
+  - `POST /auth/login` for session token issuance
+  - `POST /auth/logout` for explicit session invalidation
+  - Admin user management endpoints guarded by `superuser` role
+  - Admin UI navigation is hidden unless authenticated user role is `superuser`
+- Password security:
+  - Passwords stored with salted `scrypt` hashes
+  - Legacy plaintext demo passwords are migrated to hashes after successful login
+  - Session TTL is enforced server-side
+  - Login/signup requests are rate-limited to reduce brute-force attack surface
 
 ## Target Evolution
 

@@ -43,6 +43,36 @@ test("Store initializes default users and supports role-filtered draft access", 
   assert.equal(store.deleteDraftById(created.id), true);
   assert.equal(store.getDraftById(created.id), null);
   assert.equal(store.deleteDraftById("missing"), false);
+
+  const createdUser = store.createUser({
+    username: "newuser",
+    password: "newpass",
+    role: "customer"
+  });
+  assert.equal(createdUser.username, "newuser");
+  assert.equal(store.listUsers().some((user) => user.username === "newuser"), true);
+  assert.throws(() => {
+    store.createUser({ username: "newuser", password: "otherpass", role: "customer" });
+  }, /Username already exists/);
+
+  const updatedUser = store.updateUserPassword(createdUser.id, "changedpass");
+  assert.notEqual(updatedUser.password, "changedpass");
+  assert.equal(updatedUser.password.startsWith("scrypt$"), true);
+  assert.equal(store.deleteUserById(createdUser.id), true);
+  assert.equal(store.deleteUserById(createdUser.id), false);
+  assert.equal(store.updateUserPassword("missing-user", "changedpass"), null);
+  assert.throws(() => {
+    store.updateUserPassword(customer.id, "x");
+  }, /Password must have at least 4 characters/);
+  assert.throws(() => {
+    store.createUser({ username: "ab", password: "validpass", role: "customer" });
+  }, /Username must have at least 3 characters/);
+  assert.throws(() => {
+    store.createUser({ username: "validname", password: "123", role: "customer" });
+  }, /Password must have at least 4 characters/);
+  assert.throws(() => {
+    store.createUser({ username: "validname2", password: "validpass", role: "invalid-role" });
+  }, /Invalid role/);
 });
 
 test("Store falls back when persisted JSON is invalid", async () => {

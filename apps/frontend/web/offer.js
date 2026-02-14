@@ -1,5 +1,6 @@
 import { initContractParametersUI } from "./contract-form.js";
 import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
+import { syncAdminNavVisibility } from "./auth-nav.js";
 
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
 const OFFER_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.offer";
@@ -9,6 +10,7 @@ const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
 const quoteResult = document.getElementById("quoteResult");
 const authForm = document.getElementById("authForm");
+const signupForm = document.getElementById("signupForm");
 const authStatus = document.getElementById("authStatus");
 const loadDraftsButton = document.getElementById("loadDraftsButton");
 const logoutButton = document.getElementById("logoutButton");
@@ -74,6 +76,7 @@ authForm?.addEventListener("submit", async (event) => {
     const session = await response.json();
     localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
     authStatus.textContent = `Angemeldet als ${session.user.username} (${session.user.role}).`;
+    await syncAdminNavVisibility();
     applyAuthGate();
     await loadDrafts();
   } catch (error) {
@@ -109,14 +112,54 @@ saveDraftButton?.addEventListener("click", async () => {
   }
 });
 
-logoutButton?.addEventListener("click", () => {
+logoutButton?.addEventListener("click", async () => {
+  await logoutFromContractsService();
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   authStatus.textContent = "Nicht angemeldet.";
   draftsList.innerHTML = "";
+  await syncAdminNavVisibility();
   applyAuthGate();
 });
 
+signupForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const username = signupForm.signupUsername.value.trim();
+  const password = signupForm.signupPassword.value;
+
+  try {
+    const signupResponse = await fetch(`${CONTRACTS_SERVICE_BASE_URL}/auth/signup`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (!signupResponse.ok) {
+      throw new Error(await toGermanApiError(signupResponse, "Konto konnte nicht erstellt werden"));
+    }
+
+    const loginResponse = await fetch(`${CONTRACTS_SERVICE_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    if (!loginResponse.ok) {
+      throw new Error(await toGermanApiError(loginResponse, "Login fehlgeschlagen"));
+    }
+
+    const session = await loginResponse.json();
+    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
+    authStatus.textContent = `Konto erstellt und angemeldet als ${session.user.username}.`;
+    signupForm.reset();
+    await syncAdminNavVisibility();
+    applyAuthGate();
+  } catch (error) {
+    authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
+  }
+});
+
 async function bootstrap() {
+  await syncAdminNavVisibility();
   const resumedDraft = await loadDraftFromQuery();
   const initialOfferParameters = resumedDraft?.payload?.contractParameters?.offer || loadOfferContractParameters();
   if (resumedDraft?.payload?.contractParameters?.pricing) {
@@ -263,6 +306,22 @@ function persistOfferContractParameters(value) {
 
 function getAuthToken() {
   return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
+}
+
+async function logoutFromContractsService() {
+  const token = getAuthToken();
+  if (!token) {
+    return;
+  }
+
+  try {
+    await fetch(`${CONTRACTS_SERVICE_BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` }
+    });
+  } catch {
+    // Local logout should still complete even if server logout is unavailable.
+  }
 }
 
 function restoreAuthStatus() {

@@ -24,9 +24,11 @@ npm run test:coverage
 ## Manual Smoke Test
 
 1. Open `http://localhost:3000`.
-2. Use calculator section to compute annual net revenue.
-3. Submit quote request and verify quote id is returned.
-4. Query quote details with backend endpoint `/api/quotes/{id}`.
+2. Log in on Pricing or Offer page (or create a first-time account via Offer signup form).
+3. Use calculator section to compute annual net revenue.
+4. Submit quote request and verify quote id is returned.
+5. Query quote details with backend endpoint `/api/quotes/{id}`.
+6. Log in as `admin` and open `http://localhost:3000/admin.html` to manage users.
 
 ## Pricing Service Integration
 
@@ -43,9 +45,15 @@ npm run test:coverage
 - Liveness endpoint: `GET /health` (process alive)
 - Readiness endpoint: `GET /ready` (persistence reachable)
 - Auth model: bearer token from `/auth/login`.
+- Public signup endpoint: `POST /auth/signup` (creates `customer` users).
 - Role model:
   - `customer`: own drafts only
   - `superuser`: all drafts
+- Admin user management endpoints (`superuser` only):
+  - `GET /admin/users`
+  - `POST /admin/users`
+  - `POST /admin/users/:id/reset-password`
+  - `DELETE /admin/users/:id`
 - Optional Mongo env vars:
   - `MONGODB_DB_NAME` (default `sales_portal`)
   - `MONGODB_USERS_COLLECTION` (default `users`)
@@ -56,3 +64,4 @@ npm run test:coverage
 
 - If port `3000` or `3001` is in use, set `PORT` env var before running each app.
 - If tests fail after model changes, update deterministic expected values in unit tests.
+- If admin page is not visible, verify you are logged in as a `superuser` account.

@@ -16,6 +16,7 @@
         <a class="nav-link" href="./index.html">Pricing</a>
         <a class="nav-link" href="./offer.html">Angebot</a>
         <a class="nav-link active" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link admin-nav-link nav-hidden" href="./admin.html">Admin</a>
         <a class="nav-link" href="./agb.html">AGB</a>
         <a class="nav-link" href="./impressum.html">Impressum</a>
       </nav>
@@ -49,6 +50,10 @@
     </section>
   </main>
 
+  <script type="module">
+    import { syncAdminNavVisibility } from "./auth-nav.js";
+    syncAdminNavVisibility();
+  </script>
   <script type="module" src="./my-requests.js"></script>
 </body>
 </html>

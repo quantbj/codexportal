@@ -3,14 +3,17 @@
 ## Application Controls
 
 - input validation for every external payload
-- defensive response headers (`X-Content-Type-Options`, `Cache-Control`)
+- defensive response headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cache-Control`)
 - request size guardrails (1MB cap)
 - explicit 4xx behavior for invalid input and unknown resources
+- auth endpoint throttling for brute-force resistance
+- server-side token invalidation (`POST /auth/logout`)
+- session expiration enforced on every authenticated request
 
-## Identity and Access (next phase)
+## Identity and Access
 
 - OIDC integration for workforce and customer login
-- role-based authorization on quote/contract endpoints
+- role-based authorization on contract/admin endpoints (`customer`, `superuser`)
 - MFA for internal users
 
 ## Data Protection
@@ -34,3 +37,4 @@
   - permissive license
   - clear update strategy
 - enforce lockfile integrity and SCA scanning in CI
+- current gap: repository has no lockfile yet; add one before production releases

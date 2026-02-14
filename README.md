@@ -4,6 +4,8 @@ This repository contains a production-oriented starter for a sales portal that s
 - photovoltaic pricing simulation
 - quote intake
 - contract closing workflow preparation
+- self-service customer signup
+- superuser user management (create, remove, password reset)
 
 ## Repository Structure
 
@@ -60,9 +62,21 @@ Optional MongoDB env vars:
 - `MONGODB_USERS_COLLECTION` (default `users`)
 - `MONGODB_DRAFTS_COLLECTION` (default `drafts`)
 - `SEED_DEMO_USERS` (`true` by default; set `false` to disable)
+- `SESSION_TTL_MS` (default `28800000`, eight hours)
+- `AUTH_RATE_LIMIT_WINDOW_MS` (default `300000`, five minutes)
+- `AUTH_RATE_LIMIT_MAX_ATTEMPTS` (default `10`)
 
 ## Demo Users (contracts-service)
 
 - `customer1` / `customer1` -> role `customer`
 - `customer2` / `customer2` -> role `customer`
 - `admin` / `admin` -> role `superuser`
+
+## Security Notes
+
+- Passwords are stored as salted `scrypt` hashes (not plain text).
+- Login and protected API routes use bearer tokens with server-side session expiry.
+- Logout invalidates the current bearer token on the server (`POST /auth/logout`).
+- Admin endpoints are protected by `superuser` role checks.
+- Admin navigation is shown only for authenticated `superuser` users.
+- Login/signup endpoints are rate-limited to reduce brute-force attempts.

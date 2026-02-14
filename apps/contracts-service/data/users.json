@@ -2,19 +2,19 @@
   {
     "id": "u-customer-1",
     "username": "customer1",
-    "password": "customer1",
+    "password": "scrypt$36294caf7942715cbbc1f9483c3d40dc$180dcd3a98039774b6f1eb0f0b0c6622b8c8750d6b1d8cb23ee9204985ed89dde9244acf4f4ab0105b815816b3948d4eb80d32c7e70c9b673604e39f470bd1ff",
     "role": "customer"
   },
   {
     "id": "u-customer-2",
     "username": "customer2",
-    "password": "customer2",
+    "password": "scrypt$c032061d38a58461d4fd029b4540589f$47c477da6bd97ba958b4b67c7196974c2a9ba0502dd4db14bf088eb6cd49368618148be3b9aeaa61fc85f1311756369942a659d5122134d6e18193fffca17e38",
     "role": "customer"
   },
   {
     "id": "u-super-1",
     "username": "admin",
-    "password": "admin",
+    "password": "scrypt$f72e811e7ec68aa35d9b4d5807bd2a20$58d452fbbb3f1784118266535fb15ff8b946796ce26245e4bbc6526728eac5b9da10ac7ab89591fe8a5633c614c502379671819cc83b5b1f8fc79f91e9b0dc88",
     "role": "superuser"
   }
 ]
