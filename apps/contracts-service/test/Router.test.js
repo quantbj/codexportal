@@ -50,11 +50,11 @@ function createMemoryStore() {
   };
 }
 
-async function invokeRoute(router, { method, url, payload, authorization }) {
+async function invokeRoute(router, { method, url, payload, authorization, origin }) {
   const req = Readable.from(payload === undefined ? [] : [JSON.stringify(payload)]);
   req.method = method;
   req.url = url;
-  req.headers = { authorization: authorization || "" };
+  req.headers = { authorization: authorization || "", origin: origin || "" };
 
   let statusCode = 200;
   let body = "";
@@ -202,6 +202,7 @@ test("contracts-service handles preflight, invalid JSON and unknown route", asyn
 
   const options = await invokeRoute(router, { method: "OPTIONS", url: "/drafts" });
   assert.equal(options.statusCode, 204);
+  assert.deepEqual(options.body, {});
 
   const req = Readable.from(["{bad}"]);
   req.method = "POST";
@@ -252,4 +253,46 @@ test("contracts-service handles preflight, invalid JSON and unknown route", asyn
 
   const unknown = await invokeRoute(router, { method: "GET", url: "/unknown" });
   assert.equal(unknown.statusCode, 404);
+});
+
+test("contracts-service supports multi-origin and wildcard CORS configuration", async () => {
+  const previous = process.env.FRONTEND_ORIGIN;
+  try {
+    process.env.FRONTEND_ORIGIN = "https://portal.example,https://frontend.example";
+    const router = createRouter({ store: createMemoryStore() });
+    const options = await invokeRoute(router, {
+      method: "OPTIONS",
+      url: "/drafts",
+      origin: "https://frontend.example"
+    });
+
+    assert.equal(options.statusCode, 204);
+    assert.equal(options.headers["Access-Control-Allow-Origin"], "https://frontend.example");
+
+    process.env.FRONTEND_ORIGIN = "*";
+    const wildcard = await invokeRoute(router, {
+      method: "GET",
+      url: "/health",
+      origin: "https://any-origin.example"
+    });
+    assert.equal(wildcard.headers["Access-Control-Allow-Origin"], "*");
+
+    process.env.FRONTEND_ORIGIN = "https://portal.example,https://frontend.example";
+    const fallback = await invokeRoute(router, {
+      method: "GET",
+      url: "/health",
+      origin: "https://unknown-origin.example"
+    });
+    assert.equal(fallback.headers["Access-Control-Allow-Origin"], "https://portal.example");
+
+    process.env.FRONTEND_ORIGIN = " , ";
+    const emptyConfig = await invokeRoute(router, {
+      method: "GET",
+      url: "/health",
+      origin: "https://dynamic-origin.example"
+    });
+    assert.equal(emptyConfig.headers["Access-Control-Allow-Origin"], "https://dynamic-origin.example");
+  } finally {
+    process.env.FRONTEND_ORIGIN = previous;
+  }
 });

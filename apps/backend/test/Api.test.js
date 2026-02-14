@@ -17,6 +17,7 @@ async function invokeRoute({ method, url, payload, router = createTestRouter() }
   const req = Readable.from(payload ? [JSON.stringify(payload)] : []);
   req.method = method;
   req.url = url;
+  req.headers = {};
 
   let statusCode = 200;
   let responseBody = "";
@@ -164,4 +165,40 @@ test("API handles CORS preflight", async () => {
   assert.equal(response.statusCode, 204);
   assert.equal(response.headers["Access-Control-Allow-Origin"], EXPECTED_CORS_ORIGIN);
   assert.equal(response.headers["Access-Control-Allow-Methods"], "GET,POST,OPTIONS");
+  assert.deepEqual(response.body, {});
+});
+
+test("API supports multi-origin and wildcard CORS configuration", async () => {
+  const previous = process.env.FRONTEND_ORIGIN;
+  try {
+    process.env.FRONTEND_ORIGIN = "https://portal.example,https://frontend.example";
+    const router = createTestRouter();
+    const req = Readable.from([]);
+    req.method = "OPTIONS";
+    req.url = "/api/pricing/calculate";
+    req.headers = { origin: "https://frontend.example" };
+
+    let statusCode = 200;
+    const headers = {};
+    const res = {
+      writeHead(code, nextHeaders) {
+        statusCode = code;
+        Object.assign(headers, nextHeaders);
+      },
+      end() {}
+    };
+
+    await router(req, res);
+    assert.equal(statusCode, 204);
+    assert.equal(headers["Access-Control-Allow-Origin"], "https://frontend.example");
+
+    process.env.FRONTEND_ORIGIN = "*";
+    const wildcardResponse = await invokeRoute({
+      method: "GET",
+      url: "/health"
+    });
+    assert.equal(wildcardResponse.headers["Access-Control-Allow-Origin"], "*");
+  } finally {
+    process.env.FRONTEND_ORIGIN = previous;
+  }
 });

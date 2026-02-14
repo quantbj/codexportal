@@ -13,25 +13,25 @@ export function createRouter(dependencies = {}) {
   return async function route(req, res) {
     try {
       if (req.method === "OPTIONS") {
-        sendJson(res, 204, {});
+        sendPreflight(req, res);
         return;
       }
 
       if (req.method === "GET" && req.url === "/health") {
-        sendJson(res, 200, { status: "ok" });
+        sendJson(req, res, 200, { status: "ok" });
         return;
       }
 
       if (req.method === "POST" && req.url === "/auth/login") {
         const payload = await parseJsonBody(req);
         const session = auth.login(payload.username, payload.password);
-        sendJson(res, 200, session);
+        sendJson(req, res, 200, session);
         return;
       }
 
       if (req.method === "GET" && req.url === "/auth/me") {
         const user = auth.authenticate(req.headers.authorization);
-        sendJson(res, 200, user);
+        sendJson(req, res, 200, user);
         return;
       }
 
@@ -46,14 +46,14 @@ export function createRouter(dependencies = {}) {
           payload: payload.payload
         });
 
-        sendJson(res, 201, saved);
+        sendJson(req, res, 201, saved);
         return;
       }
 
       if (req.method === "GET" && req.url === "/drafts") {
         const user = auth.authenticate(req.headers.authorization);
         const drafts = store.listDraftsForUser(user);
-        sendJson(res, 200, drafts);
+        sendJson(req, res, 200, drafts);
         return;
       }
 
@@ -63,38 +63,78 @@ export function createRouter(dependencies = {}) {
         const draft = store.getDraftById(draftId);
 
         if (!draft) {
-          sendJson(res, 404, { error: "Draft not found" });
+          sendJson(req, res, 404, { error: "Draft not found" });
           return;
         }
 
         if (user.role !== "superuser" && draft.ownerUserId !== user.id) {
-          sendJson(res, 403, { error: "Forbidden" });
+          sendJson(req, res, 403, { error: "Forbidden" });
           return;
         }
 
-        sendJson(res, 200, draft);
+        sendJson(req, res, 200, draft);
         return;
       }
 
-      sendJson(res, 404, { error: "Not found" });
+      sendJson(req, res, 404, { error: "Not found" });
     } catch (error) {
-      sendJson(res, 400, { error: error.message });
+      sendJson(req, res, 400, { error: error.message });
     }
   };
 }
 
-function sendJson(res, statusCode, payload) {
+function sendJson(req, res, statusCode, payload) {
   const body = JSON.stringify(payload);
+  const corsOrigin = resolveCorsOrigin(req);
   res.writeHead(statusCode, {
     "Content-Type": "application/json",
     "Content-Length": Buffer.byteLength(body),
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "no-store",
-    "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
+    "Access-Control-Allow-Origin": corsOrigin,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization"
   });
   res.end(body);
+}
+
+function sendPreflight(req, res) {
+  const corsOrigin = resolveCorsOrigin(req);
+  res.writeHead(204, {
+    "X-Content-Type-Options": "nosniff",
+    "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": corsOrigin,
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type,Authorization"
+  });
+  // 204 responses must not include a body.
+  res.end();
+}
+
+function resolveCorsOrigin(req) {
+  const incomingOrigin = req.headers?.origin;
+  const configuredOrigins = (process.env.FRONTEND_ORIGIN || FRONTEND_ORIGIN || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  if (!incomingOrigin) {
+    return configuredOrigins[0] || "*";
+  }
+
+  if (configuredOrigins.length === 0) {
+    return incomingOrigin;
+  }
+
+  if (configuredOrigins.includes("*")) {
+    return "*";
+  }
+
+  if (configuredOrigins.includes(incomingOrigin)) {
+    return incomingOrigin;
+  }
+
+  return configuredOrigins[0];
 }
 
 async function parseJsonBody(req) {
