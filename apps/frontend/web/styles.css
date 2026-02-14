@@ -142,10 +142,29 @@ h1 {
   margin-bottom: 0.25rem;
 }
 
+.form-card h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  color: #1c327e;
+}
+
 .section-intro {
   margin-top: 0;
   margin-bottom: 1rem;
   color: #4a5a93;
+}
+
+.merged-divider {
+  height: 1px;
+  margin: 1.15rem 0 1rem;
+  background: linear-gradient(90deg, rgb(207 216 245 / 0.35), rgb(207 216 245 / 1), rgb(207 216 245 / 0.35));
+}
+
+.merged-schema-block {
+  background: #fbfcff;
+  border: 1px solid #e4e9fb;
+  border-radius: 12px;
+  padding: 0.9rem;
 }
 
 .sidebar-title {

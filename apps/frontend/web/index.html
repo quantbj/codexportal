@@ -53,8 +53,8 @@
 
     <section class="offer-content">
       <section class="panel form-card">
-        <h2>Anlagendaten für die Preisberechnung</h2>
-        <p class="section-intro">Diese Eingaben werden für die Angebotsseite vorbelegt.</p>
+        <h2>Anlagendaten und preisrelevante Vertragsparameter</h2>
+        <p class="section-intro">Alle preisrelevanten Eingaben sind in einem gemeinsamen Bereich zusammengefasst.</p>
         <form id="calculatorForm" class="form-grid">
           <label>
             Jahreserzeugung (MWh)
@@ -82,14 +82,15 @@
           </div>
         </form>
         <p id="calculatorResult" class="result"></p>
-      </section>
 
-      <section class="panel form-card">
-        <h2>Preisrelevante Vertragsparameter</h2>
-        <p class="section-intro">Felder werden aus <code>contract-pricing.json</code> erzeugt.</p>
-        <p id="pricingSchemaStatus" class="contract-status">Lade Vertragsschema ...</p>
-        <div id="pricingSchemaForm"></div>
-        <pre id="pricingJsonPreview" class="contract-preview">{}</pre>
+        <div class="merged-divider"></div>
+        <div class="merged-schema-block">
+          <h3>Weitere preisrelevante Vertragsparameter</h3>
+          <p class="section-intro">Felder werden aus <code>contract-pricing.json</code> erzeugt.</p>
+          <p id="pricingSchemaStatus" class="contract-status">Lade Vertragsschema ...</p>
+          <div id="pricingSchemaForm"></div>
+          <pre id="pricingJsonPreview" class="contract-preview">{}</pre>
+        </div>
       </section>
     </section>
   </main>
