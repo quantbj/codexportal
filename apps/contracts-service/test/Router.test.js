@@ -4,6 +4,8 @@ import { Readable } from "node:stream";
 
 import { createRouter } from "../src/router.js";
 
+const EXPECTED_CORS_ORIGIN = "https://codexportal-frontend.onrender.com";
+
 function createMemoryStore() {
   const users = [
     { id: "u1", username: "customer1", password: "customer1", role: "customer" },
@@ -142,7 +144,7 @@ test("contracts-service validates auth and JSON", async () => {
 
   const health = await invokeRoute(router, { method: "GET", url: "/health" });
   assert.equal(health.statusCode, 200);
-  assert.equal(health.headers["Access-Control-Allow-Origin"], "http://localhost:3000");
+  assert.equal(health.headers["Access-Control-Allow-Origin"], EXPECTED_CORS_ORIGIN);
 });
 
 test("contracts-service supports me endpoint, draft update, and not-found handling", async () => {

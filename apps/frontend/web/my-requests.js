@@ -1,5 +1,5 @@
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
-const CONTRACTS_SERVICE_BASE_URL = "http://localhost:3020";
+const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
 const authForm = document.getElementById("authForm");
 const authStatus = document.getElementById("authStatus");

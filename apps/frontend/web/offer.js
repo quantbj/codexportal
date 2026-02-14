@@ -5,8 +5,8 @@ const STORAGE_KEY = "salesPortal.latestPricing";
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
 const OFFER_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.offer";
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
-const DEFAULT_API_BASE_URL = "http://localhost:3001";
-const CONTRACTS_SERVICE_BASE_URL = "http://localhost:3020";
+const DEFAULT_API_BASE_URL = "https://codexportal-backend.onrender.com";
+const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
 const quoteForm = document.getElementById("quoteForm");
 const quoteResult = document.getElementById("quoteResult");

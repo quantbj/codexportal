@@ -33,6 +33,7 @@ npm run test:coverage
 - The backend delegates pricing to the external pricing component by default.
 - Default pricing-service URL: `http://localhost:3010`
 - Override with `PRICING_SERVICE_BASE_URL` when needed.
+- CORS frontend origin override: `FRONTEND_ORIGIN` (backend + contracts-service)
 
 ## Contracts Service Integration
 

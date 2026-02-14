@@ -3,7 +3,7 @@ import { initContractParametersUI } from "./contract-form.js";
 
 const STORAGE_KEY = "salesPortal.latestPricing";
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
-const DEFAULT_API_BASE_URL = "http://localhost:3001";
+const DEFAULT_API_BASE_URL = "https://codexportal-backend.onrender.com";
 
 const calculatorForm = document.getElementById("calculatorForm");
 const calculatorResult = document.getElementById("calculatorResult");

@@ -6,6 +6,8 @@ import { createRouter } from "../src/http/router.js";
 import { PricingEngine } from "../src/domain/pricing/PricingEngine.js";
 import { PricingModelRepository } from "../src/domain/pricing/PricingModelRepository.js";
 
+const EXPECTED_CORS_ORIGIN = "https://codexportal-frontend.onrender.com";
+
 function createTestRouter() {
   const pricingProvider = new PricingEngine(new PricingModelRepository());
   return createRouter({ pricingProvider });
@@ -44,7 +46,7 @@ test("GET /health returns OK", async () => {
   assert.equal(response.statusCode, 200);
   assert.deepEqual(response.body, { status: "ok" });
   assert.equal(response.headers["X-Content-Type-Options"], "nosniff");
-  assert.equal(response.headers["Access-Control-Allow-Origin"], "http://localhost:3000");
+  assert.equal(response.headers["Access-Control-Allow-Origin"], EXPECTED_CORS_ORIGIN);
 });
 
 test("pricing and quote flow works end-to-end", async () => {
@@ -160,6 +162,6 @@ test("API returns 400 for payload too large", async () => {
 test("API handles CORS preflight", async () => {
   const response = await invokeRoute({ method: "OPTIONS", url: "/api/pricing/calculate" });
   assert.equal(response.statusCode, 204);
-  assert.equal(response.headers["Access-Control-Allow-Origin"], "http://localhost:3000");
+  assert.equal(response.headers["Access-Control-Allow-Origin"], EXPECTED_CORS_ORIGIN);
   assert.equal(response.headers["Access-Control-Allow-Methods"], "GET,POST,OPTIONS");
 });

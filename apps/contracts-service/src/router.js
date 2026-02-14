@@ -1,6 +1,8 @@
 import { Store } from "./store.js";
 import { AuthManager } from "./auth.js";
 
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "https://codexportal-frontend.onrender.com";
+
 /**
  * Router for contract draft persistence with role-based access.
  */
@@ -88,7 +90,7 @@ function sendJson(res, statusCode, payload) {
     "Content-Length": Buffer.byteLength(body),
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "no-store",
-    "Access-Control-Allow-Origin": "http://localhost:3000",
+    "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization"
   });
