@@ -18,7 +18,7 @@ body {
   font-family: "Source Sans 3", "Trebuchet MS", sans-serif;
   color: var(--ink);
   background:
-    linear-gradient(rgb(203 214 245 / 0.92), rgb(203 214 245 / 0.92)),
+    linear-gradient(rgb(186 198 232 / 0.94), rgb(186 198 232 / 0.94)),
     url("./global-backdrop.png") center center / cover no-repeat fixed;
 }
 
