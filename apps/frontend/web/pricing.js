@@ -2,36 +2,44 @@ import { formatCurrency } from "./formatters.js";
 import { initContractParametersUI } from "./contract-form.js";
 import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
 
-const STORAGE_KEY = "salesPortal.latestPricing";
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
+const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
 const DEFAULT_API_BASE_URL = "https://codexportal-backend.onrender.com";
+const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
-const calculatorForm = document.getElementById("calculatorForm");
 const calculatorResult = document.getElementById("calculatorResult");
+const calculatePriceButton = document.getElementById("calculatePriceButton");
+const authForm = document.getElementById("authForm");
+const authStatus = document.getElementById("authStatus");
+const logoutButton = document.getElementById("logoutButton");
+const pricingFormSection = document.getElementById("pricingFormSection");
 let getPricingContractParameters = () => ({});
 
-/**
- * Restores the previous pricing input so users can continue where they left off.
- */
-restorePricingInput();
-initializePricingContractSchema();
+await initializePricingContractSchema();
+applyAuthGate();
+restoreAuthStatus();
 
-/**
- * Runs pricing calculation and stores successful input for the offer page.
- */
-calculatorForm.addEventListener("submit", async (event) => {
+authForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
+  await login();
+});
 
-  const payload = {
-    pricingModelId: "de-pv-standard-v1",
-    annualGenerationMWh: Number(calculatorForm.annualGenerationMWh.value),
-    installedCapacityKWp: Number(calculatorForm.installedCapacityKWp.value),
-    profileType: calculatorForm.profileType.value,
-    marketPremiumEurPerMWh: Number(calculatorForm.marketPremiumEurPerMWh.value)
-  };
+logoutButton?.addEventListener("click", () => {
+  localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  authStatus.textContent = "Nicht angemeldet.";
+  applyAuthGate();
+});
+
+calculatePriceButton?.addEventListener("click", async () => {
+  if (!ensureAuthenticated()) {
+    return;
+  }
 
   try {
-    const response = await fetch(`${getApiBaseUrl()}/api/pricing/calculate`, {
+    const pricingParameters = getPricingContractParameters();
+    const payload = buildPricingPayload(pricingParameters);
+
+    const response = await fetch(`${DEFAULT_API_BASE_URL}/api/pricing/calculate`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
@@ -43,68 +51,12 @@ calculatorForm.addEventListener("submit", async (event) => {
 
     const data = await response.json();
     calculatorResult.textContent = `Nettoerlös/Jahr: ${formatCurrency(data.financials.netRevenue)}`;
-
-    // Persist pricing values so the offer page can prefill the asset fields.
-    persistPricingInput({
-      annualGenerationMWh: payload.annualGenerationMWh,
-      installedCapacityKWp: payload.installedCapacityKWp,
-      marketPremiumEurPerMWh: payload.marketPremiumEurPerMWh,
-      profileType: payload.profileType
-    });
-    persistPricingContractParameters(getPricingContractParameters());
+    persistPricingContractParameters(pricingParameters);
   } catch (error) {
     calculatorResult.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
   }
 });
 
-/**
- * Applies saved pricing values to the calculator form.
- */
-function restorePricingInput() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return;
-  }
-
-  try {
-    const value = JSON.parse(raw);
-    setIfDefined(calculatorForm.annualGenerationMWh, value.annualGenerationMWh);
-    setIfDefined(calculatorForm.installedCapacityKWp, value.installedCapacityKWp);
-    setIfDefined(calculatorForm.marketPremiumEurPerMWh, value.marketPremiumEurPerMWh);
-    setIfDefined(calculatorForm.profileType, value.profileType);
-  } catch {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-}
-
-/**
- * Stores the latest valid pricing values for cross-page form prefill.
- */
-function persistPricingInput(value) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-}
-
-/**
- * Assigns form values only when a source value is present.
- */
-function setIfDefined(input, value) {
-  if (value === undefined || value === null || value === "") {
-    return;
-  }
-
-  input.value = String(value);
-}
-
-/**
- * Returns backend base URL for API calls without exposing it in the UI.
- */
-function getApiBaseUrl() {
-  return DEFAULT_API_BASE_URL;
-}
-
-/**
- * Initializes schema-driven pricing parameters.
- */
 async function initializePricingContractSchema() {
   const initialPricingParameters = loadPricingContractParameters();
   const contractUi = await initContractParametersUI({
@@ -117,16 +69,72 @@ async function initializePricingContractSchema() {
   getPricingContractParameters = contractUi.getValue;
 }
 
-/**
- * Persists contract pricing parameters for later offer submission.
- */
+async function login() {
+  const username = authForm.username.value.trim();
+  const password = authForm.password.value;
+
+  try {
+    const response = await fetch(`${CONTRACTS_SERVICE_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (!response.ok) {
+      throw new Error(await toGermanApiError(response, "Login fehlgeschlagen"));
+    }
+
+    const session = await response.json();
+    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
+    authStatus.textContent = `Angemeldet als ${session.user.username} (${session.user.role}).`;
+    applyAuthGate();
+  } catch (error) {
+    authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
+  }
+}
+
+function getAuthToken() {
+  return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
+}
+
+function ensureAuthenticated() {
+  if (getAuthToken()) {
+    return true;
+  }
+
+  authStatus.textContent = "Bitte anmelden, bevor Sie Parameter bearbeiten oder Preise berechnen.";
+  calculatorResult.textContent = "Anmeldung erforderlich.";
+  authForm?.username?.focus();
+  authForm?.scrollIntoView({ behavior: "smooth", block: "center" });
+  return false;
+}
+
+function restoreAuthStatus() {
+  if (getAuthToken()) {
+    authStatus.textContent = "Angemeldet. Parameter können bearbeitet werden.";
+  }
+}
+
+function applyAuthGate() {
+  const unlocked = Boolean(getAuthToken());
+  const lockableElements = pricingFormSection?.querySelectorAll("input, select, textarea, button");
+  lockableElements?.forEach((element) => {
+    if (element.id !== "calculatePriceButton") {
+      element.disabled = !unlocked;
+    }
+  });
+
+  if (calculatePriceButton) {
+    calculatePriceButton.disabled = !unlocked;
+  }
+
+  pricingFormSection?.classList.toggle("form-locked", !unlocked);
+}
+
 function persistPricingContractParameters(value) {
   localStorage.setItem(PRICING_SCHEMA_STORAGE_KEY, JSON.stringify(value || {}));
 }
 
-/**
- * Loads persisted pricing contract parameters from local storage.
- */
 function loadPricingContractParameters() {
   const raw = localStorage.getItem(PRICING_SCHEMA_STORAGE_KEY);
   if (!raw) {
@@ -138,4 +146,118 @@ function loadPricingContractParameters() {
   } catch {
     return {};
   }
+}
+
+function buildPricingPayload(pricingParameters) {
+  const installedCapacityKWp = deriveInstalledCapacity(pricingParameters);
+  const profileType = deriveProfileType(pricingParameters);
+  const marketPremiumEurPerMWh = deriveMarketPremium(pricingParameters);
+  const annualGenerationMWh = deriveAnnualGenerationMWh(pricingParameters, installedCapacityKWp, profileType);
+
+  if (!Number.isFinite(installedCapacityKWp) || installedCapacityKWp <= 0) {
+    throw new Error("Installierte Leistung konnte nicht aus den Vertragsparametern abgeleitet werden.");
+  }
+
+  if (!Number.isFinite(annualGenerationMWh) || annualGenerationMWh <= 0) {
+    throw new Error("Jahreserzeugung konnte nicht aus den Vertragsparametern abgeleitet werden.");
+  }
+
+  return {
+    pricingModelId: "de-pv-standard-v1",
+    annualGenerationMWh,
+    installedCapacityKWp,
+    profileType,
+    marketPremiumEurPerMWh
+  };
+}
+
+function deriveInstalledCapacity(pricingParameters) {
+  const technicalResources = getArray(pricingParameters.technical_resources);
+  const summedInstalledCapacity = technicalResources
+    .map((resource) => Number(resource?.installed_capacity))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .reduce((total, value) => total + value, 0);
+
+  if (summedInstalledCapacity > 0) {
+    return summedInstalledCapacity;
+  }
+
+  const parkCapacity = Number(pricingParameters?.park?.cumulative_inverter_capacity);
+  if (Number.isFinite(parkCapacity) && parkCapacity > 0) {
+    return parkCapacity;
+  }
+
+  const meteringPoints = getArray(pricingParameters.metering_points);
+  const meteringCapacity = Number(meteringPoints[0]?.maximum_feed_in_capacity);
+  if (Number.isFinite(meteringCapacity) && meteringCapacity > 0) {
+    return meteringCapacity;
+  }
+
+  return NaN;
+}
+
+function deriveProfileType(pricingParameters) {
+  const technologies = getArray(pricingParameters.technical_resources)
+    .map((resource) => resource?.technology)
+    .filter(Boolean);
+
+  if (technologies.length === 0) {
+    return "mixed";
+  }
+
+  const hasWind = technologies.includes("wind");
+  const hasPv = technologies.includes("photovoltaic");
+
+  if (hasWind && !hasPv) {
+    return "baseLoad";
+  }
+
+  if (hasPv && !hasWind) {
+    return "peakLoad";
+  }
+
+  return "mixed";
+}
+
+function deriveAnnualGenerationMWh(pricingParameters, installedCapacityKWp, profileType) {
+  const explicitAnnualGeneration = Number(
+    pricingParameters?.park?.annual_generation_mwh
+      || pricingParameters?.park?.annual_feed_in_mwh
+      || pricingParameters?.park?.expected_annual_generation_mwh
+  );
+  if (Number.isFinite(explicitAnnualGeneration) && explicitAnnualGeneration > 0) {
+    return explicitAnnualGeneration;
+  }
+
+  const specificYieldByProfile = {
+    peakLoad: 1.0,
+    baseLoad: 2.6,
+    mixed: 1.4
+  };
+  return Number((installedCapacityKWp * specificYieldByProfile[profileType]).toFixed(3));
+}
+
+function deriveMarketPremium(pricingParameters) {
+  const firstContractItem = getArray(pricingParameters.contract_items)[0] || {};
+  const remuneration = firstContractItem?.remuneration_configuration || {};
+  const compensation = remuneration?.market_based_compensation || {};
+
+  const candidates = [
+    compensation.compensation_type_amount,
+    remuneration?.feed_in_remuneration?.price,
+    firstContractItem?.market_premium_eur_per_mwh
+  ];
+
+  for (const candidate of candidates) {
+    const value = Number(candidate);
+    if (Number.isFinite(value)) {
+      return value;
+    }
+  }
+
+  return 5;
+}
+
+function getArray(value) {
+  return Array.isArray(value) ? value : [];
 }

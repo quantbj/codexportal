@@ -48,8 +48,8 @@
       <section class="panel">
         <p class="sidebar-title">Ablauf</p>
         <ol class="process-list">
-          <li><strong>Erzeugungsdaten</strong><span>Basisinformationen zur Anlage eingeben.</span></li>
-          <li><strong>Kontaktdaten</strong><span>Ansprechpartner für das Vertragsangebot angeben.</span></li>
+          <li><strong>Anmelden</strong><span>Einloggen, um Vertragsparameter zu bearbeiten.</span></li>
+          <li><strong>Vertragsdaten ergänzen</strong><span>Alle verbleibenden Felder im Angebot ausfüllen.</span></li>
           <li><strong>Anfrage absenden</strong><span>Wir prüfen und senden Ihr individuelles Angebot.</span></li>
         </ol>
       </section>
@@ -66,57 +66,17 @@
 
     <section class="offer-content">
       <section class="panel form-card">
-        <h2>Anlagedaten</h2>
-        <p class="section-intro">Werte aus der letzten Preisberechnung sind bereits vorbelegt.</p>
-        <form id="quoteForm" class="form-grid">
-          <label>
-            Jahreserzeugung (MWh)
-            <input name="annualGenerationMWh" type="number" min="1" required>
-          </label>
-          <label>
-            Leistung (kWp)
-            <input name="installedCapacityKWp" type="number" min="1" required>
-          </label>
-          <label>
-            Marktprämie (EUR/MWh)
-            <input name="marketPremiumEurPerMWh" type="number" required>
-          </label>
-          <label>
-            Profil
-            <select name="profileType">
-              <option value="mixed">Mixed</option>
-              <option value="baseLoad">Base Load</option>
-              <option value="peakLoad">Peak Load</option>
-            </select>
-          </label>
-          <label class="full-width">
-            Standort
-            <input name="location" type="text" required>
-          </label>
-
-          <label>
-            Unternehmen
-            <input name="companyName" type="text" required>
-          </label>
-          <label>
-            Ansprechpartner
-            <input name="contactName" type="text" required>
-          </label>
-          <label class="full-width">
-            E-Mail
-            <input name="email" type="email" required>
-          </label>
-
-          <div class="form-actions">
-            <button type="submit">Angebot anfordern</button>
-            <button id="saveDraftButton" type="button">Entwurf speichern</button>
-            <a class="button-link secondary" href="./index.html">Zurück zur Preisberechnung</a>
-          </div>
-        </form>
+        <h2>Angebot abschließen</h2>
+        <p class="section-intro">Die preisrelevanten Parameter werden von Seite 1 übernommen. Hier erfassen Sie nur die übrigen Vertragsdaten.</p>
+        <div class="form-actions">
+          <button id="submitQuoteButton" type="button">Angebot anfordern</button>
+          <button id="saveDraftButton" type="button">Entwurf speichern</button>
+          <a class="button-link secondary" href="./index.html">Zurück zur Preisberechnung</a>
+        </div>
         <p id="quoteResult" class="result"></p>
       </section>
 
-      <section class="panel form-card">
+      <section class="panel form-card" id="offerFormSection">
         <h2>Weitere Vertragsparameter</h2>
         <p class="section-intro">Felder werden aus <code>contract-offer.json</code> erzeugt.</p>
         <p id="contractSchemaStatus" class="contract-status">Lade Vertragsschema ...</p>
