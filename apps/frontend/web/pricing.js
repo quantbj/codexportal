@@ -182,17 +182,6 @@ function deriveInstalledCapacity(pricingParameters) {
     return summedInstalledCapacity;
   }
 
-  const parkCapacity = Number(pricingParameters?.park?.cumulative_inverter_capacity);
-  if (Number.isFinite(parkCapacity) && parkCapacity > 0) {
-    return parkCapacity;
-  }
-
-  const meteringPoints = getArray(pricingParameters.metering_points);
-  const meteringCapacity = Number(meteringPoints[0]?.maximum_feed_in_capacity);
-  if (Number.isFinite(meteringCapacity) && meteringCapacity > 0) {
-    return meteringCapacity;
-  }
-
   return NaN;
 }
 
@@ -220,15 +209,6 @@ function deriveProfileType(pricingParameters) {
 }
 
 function deriveAnnualGenerationMWh(pricingParameters, installedCapacityKWp, profileType) {
-  const explicitAnnualGeneration = Number(
-    pricingParameters?.park?.annual_generation_mwh
-      || pricingParameters?.park?.annual_feed_in_mwh
-      || pricingParameters?.park?.expected_annual_generation_mwh
-  );
-  if (Number.isFinite(explicitAnnualGeneration) && explicitAnnualGeneration > 0) {
-    return explicitAnnualGeneration;
-  }
-
   const specificYieldByProfile = {
     peakLoad: 1.0,
     baseLoad: 2.6,
