@@ -17,7 +17,9 @@ body {
   margin: 0;
   font-family: "Source Sans 3", "Trebuchet MS", sans-serif;
   color: var(--ink);
-  background: radial-gradient(circle at top right, #f7f9ff, var(--bg));
+  background:
+    linear-gradient(rgb(241 244 255 / 0.88), rgb(241 244 255 / 0.88)),
+    url("./global-backdrop.png") center center / cover no-repeat fixed;
 }
 
 .hero {
