@@ -1,4 +1,4 @@
-import { toGermanErrorMessage } from "./errors.js";
+import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
 const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
@@ -24,8 +24,7 @@ authForm.addEventListener("submit", async (event) => {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(toGermanErrorMessage(error.error || "Login fehlgeschlagen"));
+      throw new Error(await toGermanApiError(response, "Login fehlgeschlagen"));
     }
 
     const session = await response.json();
@@ -62,8 +61,7 @@ async function loadDrafts() {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(toGermanErrorMessage(error.error || "Anfragen konnten nicht geladen werden"));
+    throw new Error(await toGermanApiError(response, "Anfragen konnten nicht geladen werden"));
   }
 
   const drafts = await response.json();
@@ -126,8 +124,7 @@ async function deleteDraft(draftId) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(toGermanErrorMessage(error.error || "Anfrage konnte nicht gelöscht werden"));
+    throw new Error(await toGermanApiError(response, "Anfrage konnte nicht gelöscht werden"));
   }
 }
 

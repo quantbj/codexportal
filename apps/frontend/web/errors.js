@@ -42,6 +42,18 @@ export function toGermanErrorMessage(errorOrMessage) {
   return message || "Unbekannter Fehler.";
 }
 
+/**
+ * Parses API error payloads safely and returns a localized message.
+ */
+export async function toGermanApiError(response, fallbackMessage) {
+  try {
+    const payload = await response.json();
+    return toGermanErrorMessage(payload?.error || fallbackMessage);
+  } catch {
+    return toGermanErrorMessage(fallbackMessage);
+  }
+}
+
 function extractMessage(errorOrMessage) {
   if (!errorOrMessage) {
     return "";

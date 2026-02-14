@@ -1,6 +1,6 @@
 import { normalizeQuoteRequest } from "./formatters.js";
 import { initContractParametersUI } from "./contract-form.js";
-import { toGermanErrorMessage } from "./errors.js";
+import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
 
 const STORAGE_KEY = "salesPortal.latestPricing";
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
@@ -34,8 +34,7 @@ quoteForm.addEventListener("submit", async (event) => {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(toGermanErrorMessage(error.error || "Quote request failed"));
+      throw new Error(await toGermanApiError(response, "Quote request failed"));
     }
 
     const quote = await response.json();
@@ -77,8 +76,7 @@ authForm?.addEventListener("submit", async (event) => {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(toGermanErrorMessage(error.error || "Login fehlgeschlagen"));
+      throw new Error(await toGermanApiError(response, "Login fehlgeschlagen"));
     }
 
     const session = await response.json();
@@ -182,8 +180,7 @@ async function loadDraftFromQuery() {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    authStatus.textContent = `Fehler beim Laden: ${toGermanErrorMessage(error.error || "Unbekannt")}`;
+    authStatus.textContent = `Fehler beim Laden: ${await toGermanApiError(response, "Unbekannt")}`;
     return null;
   }
 
@@ -318,8 +315,7 @@ async function saveDraft(draftPayload) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(toGermanErrorMessage(error.error || "Entwurf konnte nicht gespeichert werden"));
+    throw new Error(await toGermanApiError(response, "Entwurf konnte nicht gespeichert werden"));
   }
 
   return response.json();
@@ -338,8 +334,7 @@ async function loadDrafts() {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(toGermanErrorMessage(error.error || "Anfragen konnten nicht geladen werden"));
+    throw new Error(await toGermanApiError(response, "Anfragen konnten nicht geladen werden"));
   }
 
   const drafts = await response.json();
