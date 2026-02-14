@@ -7,6 +7,6 @@
     "start": "node src/http/index.js",
     "test": "node --test",
     "test:coverage": "bash ../../scripts/coverage-check.sh",
-    "lint": "node --check src/http/index.js && node --check src/http/server.js && node --check src/http/router.js && node --check src/domain/pricing/PricingEngine.js && node --check src/domain/pricing/PricingModelRepository.js && node --check src/domain/quotes/QuoteService.js && node --check src/domain/quotes/InMemoryQuoteRepository.js && node --check src/integrations/pricing/HttpPricingClient.js"
+    "lint": "node --check src/http/index.js && node --check src/http/server.js && node --check src/http/router.js && node --check src/http/httpUtils.js && node --check src/domain/pricing/PricingEngine.js && node --check src/domain/pricing/PricingModelRepository.js && node --check src/domain/quotes/QuoteService.js && node --check src/domain/quotes/InMemoryQuoteRepository.js && node --check src/integrations/pricing/HttpPricingClient.js"
   }
 }

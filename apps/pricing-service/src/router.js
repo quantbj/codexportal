@@ -11,7 +11,7 @@ export function createRouter(dependencies = {}) {
   return async function route(req, res) {
     try {
       if (req.method === "OPTIONS") {
-        sendJson(res, 204, {});
+        sendPreflight(res);
         return;
       }
 
@@ -32,6 +32,14 @@ export function createRouter(dependencies = {}) {
       sendJson(res, 400, { error: error.message });
     }
   };
+}
+
+function sendPreflight(res) {
+  res.writeHead(204, {
+    "X-Content-Type-Options": "nosniff",
+    "Cache-Control": "no-store"
+  });
+  res.end();
 }
 
 /**
