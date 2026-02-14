@@ -7,6 +7,9 @@
     "start": "node src/index.js",
     "test": "node --test",
     "test:coverage": "bash ../../scripts/coverage-check.sh",
-    "lint": "node --check src/index.js && node --check src/router.js && node --check src/auth.js && node --check src/store.js"
+    "lint": "node --check src/index.js && node --check src/router.js && node --check src/auth.js && node --check src/store.js && node --check src/mongoStore.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.18.0"
   }
 }

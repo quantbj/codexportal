@@ -24,22 +24,22 @@ export function createRouter(dependencies = {}) {
 
       if (req.method === "POST" && req.url === "/auth/login") {
         const payload = await parseJsonBody(req);
-        const session = auth.login(payload.username, payload.password);
+        const session = await auth.login(payload.username, payload.password);
         sendJson(req, res, 200, session);
         return;
       }
 
       if (req.method === "GET" && req.url === "/auth/me") {
-        const user = auth.authenticate(req.headers.authorization);
+        const user = await auth.authenticate(req.headers.authorization);
         sendJson(req, res, 200, user);
         return;
       }
 
       if (req.method === "POST" && req.url === "/drafts") {
-        const user = auth.authenticate(req.headers.authorization);
+        const user = await auth.authenticate(req.headers.authorization);
         const payload = await parseJsonBody(req);
 
-        const saved = store.saveDraft({
+        const saved = await store.saveDraft({
           id: payload.id,
           ownerUserId: user.id,
           schemaVersion: payload.schemaVersion,
@@ -51,16 +51,16 @@ export function createRouter(dependencies = {}) {
       }
 
       if (req.method === "GET" && req.url === "/drafts") {
-        const user = auth.authenticate(req.headers.authorization);
-        const drafts = store.listDraftsForUser(user);
+        const user = await auth.authenticate(req.headers.authorization);
+        const drafts = await store.listDraftsForUser(user);
         sendJson(req, res, 200, drafts);
         return;
       }
 
       if (req.method === "GET" && req.url.startsWith("/drafts/")) {
-        const user = auth.authenticate(req.headers.authorization);
+        const user = await auth.authenticate(req.headers.authorization);
         const draftId = req.url.replace("/drafts/", "");
-        const draft = store.getDraftById(draftId);
+        const draft = await store.getDraftById(draftId);
 
         if (!draft) {
           sendJson(req, res, 404, { error: "Draft not found" });
@@ -77,9 +77,9 @@ export function createRouter(dependencies = {}) {
       }
 
       if (req.method === "DELETE" && req.url.startsWith("/drafts/")) {
-        const user = auth.authenticate(req.headers.authorization);
+        const user = await auth.authenticate(req.headers.authorization);
         const draftId = req.url.replace("/drafts/", "");
-        const draft = store.getDraftById(draftId);
+        const draft = await store.getDraftById(draftId);
 
         if (!draft) {
           sendJson(req, res, 404, { error: "Draft not found" });
@@ -91,7 +91,7 @@ export function createRouter(dependencies = {}) {
           return;
         }
 
-        store.deleteDraftById(draftId);
+        await store.deleteDraftById(draftId);
         sendJson(req, res, 200, { deleted: true, id: draftId });
         return;
       }

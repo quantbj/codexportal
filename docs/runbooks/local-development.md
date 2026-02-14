@@ -37,12 +37,18 @@ npm run test:coverage
 
 ## Contracts Service Integration
 
-- Contract drafts are persisted in `apps/contracts-service/data/drafts.json`.
+- Contract drafts are persisted in MongoDB when `MONGODB_URI` is set.
+- Without `MONGODB_URI`, contracts-service falls back to `apps/contracts-service/data/drafts.json`.
 - Service URL: `http://localhost:3020`
 - Auth model: bearer token from `/auth/login`.
 - Role model:
   - `customer`: own drafts only
   - `superuser`: all drafts
+- Optional Mongo env vars:
+  - `MONGODB_DB_NAME` (default `sales_portal`)
+  - `MONGODB_USERS_COLLECTION` (default `users`)
+  - `MONGODB_DRAFTS_COLLECTION` (default `drafts`)
+  - `SEED_DEMO_USERS` (`true` default)
 
 ## Troubleshooting
 

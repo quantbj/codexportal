@@ -12,8 +12,8 @@ export class AuthManager {
   /**
    * Validates user credentials and returns a session token.
    */
-  login(username, password) {
-    const user = this.store.getUserByUsername(username);
+  async login(username, password) {
+    const user = await this.store.getUserByUsername(username);
     if (!user || user.password !== password) {
       throw new Error("Invalid credentials");
     }
@@ -26,7 +26,7 @@ export class AuthManager {
   /**
    * Resolves a user from bearer token.
    */
-  authenticate(authorizationHeader) {
+  async authenticate(authorizationHeader) {
     if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
       throw new Error("Missing bearer token");
     }
@@ -37,7 +37,7 @@ export class AuthManager {
       throw new Error("Invalid token");
     }
 
-    const user = this.store.getUserById(userId);
+    const user = await this.store.getUserById(userId);
     if (!user) {
       throw new Error("Unknown user");
     }

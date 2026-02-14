@@ -47,6 +47,20 @@ Coverage target is at least 90% for lines and branches.
 - minimal dependency footprint to reduce supply-chain risk
 - documentation-first architecture decisions (ADRs)
 
+## Contracts Persistence
+
+`contracts-service` supports two persistence modes:
+
+- MongoDB (recommended for production): set `MONGODB_URI`
+- File fallback (local/dev): `apps/contracts-service/data/*.json`
+
+Optional MongoDB env vars:
+
+- `MONGODB_DB_NAME` (default `sales_portal`)
+- `MONGODB_USERS_COLLECTION` (default `users`)
+- `MONGODB_DRAFTS_COLLECTION` (default `drafts`)
+- `SEED_DEMO_USERS` (`true` by default; set `false` to disable)
+
 ## Demo Users (contracts-service)
 
 - `customer1` / `customer1` -> role `customer`

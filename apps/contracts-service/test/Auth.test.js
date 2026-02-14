@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import { AuthManager } from "../src/auth.js";
 
-test("AuthManager handles invalid token and unknown user", () => {
+test("AuthManager handles invalid token and unknown user", async () => {
   const store = {
     getUserByUsername(username) {
       if (username === "ok") {
@@ -21,15 +21,15 @@ test("AuthManager handles invalid token and unknown user", () => {
 
   const auth = new AuthManager(store);
 
-  assert.throws(() => auth.login("ok", "bad"), /Invalid credentials/);
+  await assert.rejects(() => auth.login("ok", "bad"), /Invalid credentials/);
 
-  const session = auth.login("ok", "pw");
+  const session = await auth.login("ok", "pw");
   assert.ok(session.token);
-  assert.equal(auth.authenticate(`Bearer ${session.token}`).id, "u1");
+  assert.equal((await auth.authenticate(`Bearer ${session.token}`)).id, "u1");
 
-  assert.throws(() => auth.login("nobody", "pw"), /Invalid credentials/);
-  assert.throws(() => auth.authenticate("Bearer invalid"), /Invalid token/);
+  await assert.rejects(() => auth.login("nobody", "pw"), /Invalid credentials/);
+  await assert.rejects(() => auth.authenticate("Bearer invalid"), /Invalid token/);
 
   auth.sessions.set("dangling", "missing-user");
-  assert.throws(() => auth.authenticate("Bearer dangling"), /Unknown user/);
+  await assert.rejects(() => auth.authenticate("Bearer dangling"), /Unknown user/);
 });
