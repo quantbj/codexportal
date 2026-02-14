@@ -33,9 +33,29 @@
   <main class="layout offer-layout">
     <aside class="offer-sidebar">
       <section class="panel">
+        <p class="sidebar-title">Benutzerkonto</p>
+        <form id="authForm" class="form-grid">
+          <label>
+            Benutzername
+            <input name="username" type="text" placeholder="customer1" required>
+          </label>
+          <label>
+            Passwort
+            <input name="password" type="password" placeholder="customer1" required>
+          </label>
+          <div class="form-actions">
+            <button type="submit">Anmelden</button>
+            <button id="logoutButton" type="button">Abmelden</button>
+          </div>
+        </form>
+        <p id="authStatus" class="contract-status">Nicht angemeldet.</p>
+      </section>
+
+      <section class="panel">
         <p class="sidebar-title">Ablauf</p>
         <ol class="process-list">
-          <li><strong>Anlagedaten eingeben</strong><span>Leistung, Erzeugung und Profil hinterlegen.</span></li>
+          <li><strong>Anmelden</strong><span>Einloggen, um Parameter zu bearbeiten.</span></li>
+          <li><strong>Vertragsparameter eingeben</strong><span>Alle Felder aus dem Vertragsschema ausfüllen.</span></li>
           <li><strong>Preis berechnen</strong><span>Nettoerlöspotenzial auf Basis Ihrer Werte ermitteln.</span></li>
           <li><strong>Angebot starten</strong><span>Die Daten direkt in die Angebotsseite übernehmen.</span></li>
         </ol>
@@ -53,43 +73,18 @@
 
     <section class="offer-content">
       <section class="panel form-card">
-        <h2>Anlagendaten und preisrelevante Vertragsparameter</h2>
-        <p class="section-intro">Alle preisrelevanten Eingaben sind in einem gemeinsamen Bereich zusammengefasst.</p>
-        <form id="calculatorForm" class="form-grid">
-          <label>
-            Jahreserzeugung (MWh)
-            <input name="annualGenerationMWh" type="number" min="1" value="400" required>
-          </label>
-          <label>
-            Leistung (kWp)
-            <input name="installedCapacityKWp" type="number" min="1" value="500" required>
-          </label>
-          <label>
-            Marktprämie (EUR/MWh)
-            <input name="marketPremiumEurPerMWh" type="number" value="5" required>
-          </label>
-          <label>
-            Profil
-            <select name="profileType">
-              <option value="mixed">Mixed</option>
-              <option value="baseLoad">Base Load</option>
-              <option value="peakLoad">Peak Load</option>
-            </select>
-          </label>
-          <div class="form-actions">
-            <button type="submit">Preis berechnen</button>
-            <a class="button-link secondary" href="./offer.html">Weiter zur Angebotsseite</a>
-          </div>
-        </form>
+        <h2>Preisrelevante Vertragsparameter</h2>
+        <p class="section-intro">Erfassen Sie zuerst alle Parameter aus <code>contract-pricing.json</code>, danach berechnen Sie den Preis.</p>
         <p id="calculatorResult" class="result"></p>
 
-        <div class="merged-divider"></div>
-        <div class="merged-schema-block">
-          <h3>Weitere preisrelevante Vertragsparameter</h3>
-          <p class="section-intro">Felder werden aus <code>contract-pricing.json</code> erzeugt.</p>
+        <div class="merged-schema-block" id="pricingFormSection">
           <p id="pricingSchemaStatus" class="contract-status">Lade Vertragsschema ...</p>
           <div id="pricingSchemaForm"></div>
           <pre id="pricingJsonPreview" class="contract-preview">{}</pre>
+          <div class="form-actions">
+            <button id="calculatePriceButton" type="button">Preis berechnen</button>
+            <a class="button-link secondary" href="./offer.html">Weiter zur Angebotsseite</a>
+          </div>
         </div>
       </section>
     </section>

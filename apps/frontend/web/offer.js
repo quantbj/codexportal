@@ -1,33 +1,34 @@
-import { normalizeQuoteRequest } from "./formatters.js";
 import { initContractParametersUI } from "./contract-form.js";
 import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
 
-const STORAGE_KEY = "salesPortal.latestPricing";
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
 const OFFER_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.offer";
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
 const DEFAULT_API_BASE_URL = "https://codexportal-backend.onrender.com";
 const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
-const quoteForm = document.getElementById("quoteForm");
 const quoteResult = document.getElementById("quoteResult");
 const authForm = document.getElementById("authForm");
 const authStatus = document.getElementById("authStatus");
 const loadDraftsButton = document.getElementById("loadDraftsButton");
 const logoutButton = document.getElementById("logoutButton");
+const submitQuoteButton = document.getElementById("submitQuoteButton");
 const saveDraftButton = document.getElementById("saveDraftButton");
 const draftsList = document.getElementById("draftsList");
+const offerFormSection = document.getElementById("offerFormSection");
 let getContractParameters = () => ({});
 
 await bootstrap();
+applyAuthGate();
 
-quoteForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+submitQuoteButton?.addEventListener("click", async () => {
+  if (!ensureAuthenticatedForOfferAction()) {
+    return;
+  }
 
   try {
     const payload = buildQuotePayload();
-
-    const response = await fetch(`${getApiBaseUrl()}/api/quotes/request`, {
+    const response = await fetch(`${DEFAULT_API_BASE_URL}/api/quotes/request`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
@@ -40,23 +41,14 @@ quoteForm.addEventListener("submit", async (event) => {
     const quote = await response.json();
     quoteResult.textContent = `Anfrage ${quote.id} erstellt. Status: ${quote.status}`;
 
-    persistPricingInput({
-      annualGenerationMWh: payload.asset.annualGenerationMWh,
-      installedCapacityKWp: payload.asset.installedCapacityKWp,
-      marketPremiumEurPerMWh: payload.asset.marketPremiumEurPerMWh,
-      profileType: payload.asset.profileType
+    await saveDraft({
+      schemaVersion: "v1",
+      payload: {
+        quote,
+        contractParameters: payload.contractParameters,
+        quoteInput: payload
+      }
     });
-
-    if (getAuthToken()) {
-      await saveDraft({
-        schemaVersion: "v1",
-        payload: {
-          quote,
-          contractParameters: payload.contractParameters,
-          quoteInput: payload
-        }
-      });
-    }
   } catch (error) {
     quoteResult.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
   }
@@ -82,6 +74,7 @@ authForm?.addEventListener("submit", async (event) => {
     const session = await response.json();
     localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
     authStatus.textContent = `Angemeldet als ${session.user.username} (${session.user.role}).`;
+    applyAuthGate();
     await loadDrafts();
   } catch (error) {
     authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
@@ -97,11 +90,11 @@ loadDraftsButton?.addEventListener("click", async () => {
 });
 
 saveDraftButton?.addEventListener("click", async () => {
-  try {
-    if (!ensureAuthenticatedForDraftAction()) {
-      return;
-    }
+  if (!ensureAuthenticatedForOfferAction()) {
+    return;
+  }
 
+  try {
     const payload = buildQuotePayload();
     await saveDraft({
       schemaVersion: "v1",
@@ -120,39 +113,11 @@ logoutButton?.addEventListener("click", () => {
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   authStatus.textContent = "Nicht angemeldet.";
   draftsList.innerHTML = "";
+  applyAuthGate();
 });
-
-function buildQuotePayload() {
-  const payload = normalizeQuoteRequest({
-    companyName: quoteForm.companyName.value,
-    contactName: quoteForm.contactName.value,
-    email: quoteForm.email.value,
-    location: quoteForm.location.value,
-    annualGenerationMWh: quoteForm.annualGenerationMWh.value,
-    installedCapacityKWp: quoteForm.installedCapacityKWp.value,
-    marketPremiumEurPerMWh: quoteForm.marketPremiumEurPerMWh.value,
-    profileType: quoteForm.profileType.value
-  });
-
-  const offerParameters = getContractParameters();
-  persistOfferContractParameters(offerParameters);
-
-  payload.contractParameters = {
-    pricing: loadPricingContractParameters(),
-    offer: offerParameters
-  };
-
-  return payload;
-}
 
 async function bootstrap() {
   const resumedDraft = await loadDraftFromQuery();
-  restorePricingInput();
-
-  if (resumedDraft?.payload?.quoteInput) {
-    applyQuoteInputToForm(resumedDraft.payload.quoteInput);
-  }
-
   const initialOfferParameters = resumedDraft?.payload?.contractParameters?.offer || loadOfferContractParameters();
   if (resumedDraft?.payload?.contractParameters?.pricing) {
     localStorage.setItem(PRICING_SCHEMA_STORAGE_KEY, JSON.stringify(resumedDraft.payload.contractParameters.pricing));
@@ -189,49 +154,6 @@ async function loadDraftFromQuery() {
   return draft;
 }
 
-function applyQuoteInputToForm(quoteInput) {
-  const customer = quoteInput.customer || {};
-  const asset = quoteInput.asset || {};
-
-  setIfDefined(quoteForm.companyName, customer.companyName);
-  setIfDefined(quoteForm.contactName, customer.contactName);
-  setIfDefined(quoteForm.email, customer.email);
-  setIfDefined(quoteForm.location, asset.location);
-  setIfDefined(quoteForm.annualGenerationMWh, asset.annualGenerationMWh);
-  setIfDefined(quoteForm.installedCapacityKWp, asset.installedCapacityKWp);
-  setIfDefined(quoteForm.marketPremiumEurPerMWh, asset.marketPremiumEurPerMWh);
-  setIfDefined(quoteForm.profileType, asset.profileType);
-}
-
-function restorePricingInput() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return;
-  }
-
-  try {
-    const value = JSON.parse(raw);
-    setIfDefined(quoteForm.annualGenerationMWh, value.annualGenerationMWh);
-    setIfDefined(quoteForm.installedCapacityKWp, value.installedCapacityKWp);
-    setIfDefined(quoteForm.marketPremiumEurPerMWh, value.marketPremiumEurPerMWh);
-    setIfDefined(quoteForm.profileType, value.profileType);
-  } catch {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-}
-
-function persistPricingInput(value) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-}
-
-function setIfDefined(input, value) {
-  if (!input || value === undefined || value === null || value === "") {
-    return;
-  }
-
-  input.value = String(value);
-}
-
 async function initializeContractSchema(initialValue = {}) {
   const contractUi = await initContractParametersUI({
     formRootId: "contractSchemaForm",
@@ -243,20 +165,80 @@ async function initializeContractSchema(initialValue = {}) {
   getContractParameters = contractUi.getValue;
 }
 
-function getApiBaseUrl() {
-  return DEFAULT_API_BASE_URL;
+function buildQuotePayload() {
+  const pricing = loadPricingContractParameters();
+  const offer = getContractParameters();
+  persistOfferContractParameters(offer);
+
+  const customer = deriveCustomer(offer);
+  const asset = deriveAsset(pricing);
+
+  return {
+    customer,
+    asset: {
+      ...asset,
+      pricingModelId: "de-pv-standard-v1"
+    },
+    contractParameters: { pricing, offer }
+  };
+}
+
+function deriveCustomer(offer) {
+  const companyName = String(offer?.counterparty?.company_name || "").trim();
+  const firstContact = Array.isArray(offer?.contact_persons) ? offer.contact_persons[0] || {} : {};
+  const contactName = [firstContact.first_name, firstContact.last_name].filter(Boolean).join(" ").trim() || companyName;
+  const email = String(firstContact.email || offer?.counterparty?.communication?.email || "").trim();
+
+  if (!companyName || !contactName || !email) {
+    throw new Error("Kundendaten in Angebotsparametern sind unvollständig.");
+  }
+
+  return { companyName, contactName, email };
+}
+
+function deriveAsset(pricing) {
+  const technicalResources = getArray(pricing.technical_resources);
+  const installedCapacityKWp = technicalResources
+    .map((resource) => Number(resource?.installed_capacity))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .reduce((total, value) => total + value, 0);
+
+  const technologies = technicalResources.map((resource) => resource?.technology).filter(Boolean);
+  const hasWind = technologies.includes("wind");
+  const hasPv = technologies.includes("photovoltaic");
+  const profileType = hasWind && !hasPv ? "baseLoad" : hasPv && !hasWind ? "peakLoad" : "mixed";
+  const specificYield = profileType === "baseLoad" ? 2.6 : profileType === "peakLoad" ? 1.0 : 1.4;
+  const annualGenerationMWh = Number((installedCapacityKWp * specificYield).toFixed(3));
+  const marketPremiumEurPerMWh = Number(
+    pricing?.contract_items?.[0]?.remuneration_configuration?.feed_in_remuneration?.price
+      || pricing?.contract_items?.[0]?.market_premium_eur_per_mwh
+      || 5
+  );
+  const location = String(pricing?.park?.control_area || pricing?.park?.park_name || "DE").trim();
+
+  if (!Number.isFinite(installedCapacityKWp) || installedCapacityKWp <= 0) {
+    throw new Error("Preisparameter enthalten keine gültige installierte Leistung.");
+  }
+
+  return {
+    location,
+    annualGenerationMWh,
+    installedCapacityKWp,
+    profileType,
+    marketPremiumEurPerMWh: Number.isFinite(marketPremiumEurPerMWh) ? marketPremiumEurPerMWh : 5
+  };
 }
 
 function loadPricingContractParameters() {
   const raw = localStorage.getItem(PRICING_SCHEMA_STORAGE_KEY);
   if (!raw) {
-    return {};
+    throw new Error("Es sind keine Preisparameter gespeichert. Bitte zuerst Seite 'Pricing' ausfüllen.");
   }
 
   try {
     return JSON.parse(raw) || {};
   } catch {
-    return {};
+    throw new Error("Gespeicherte Preisparameter sind ungültig.");
   }
 }
 
@@ -283,20 +265,30 @@ function getAuthToken() {
 
 function restoreAuthStatus() {
   if (getAuthToken()) {
-    authStatus.textContent = "Token vorhanden. Anfragen können geladen werden.";
+    authStatus.textContent = "Token vorhanden. Angebotsparameter können bearbeitet werden.";
   }
 }
 
-function ensureAuthenticatedForDraftAction() {
+function ensureAuthenticatedForOfferAction() {
   if (getAuthToken()) {
     return true;
   }
 
-  authStatus.textContent = "Bitte anmelden, um Entwürfe zu speichern.";
-  quoteResult.textContent = "Bitte zuerst anmelden, dann Entwurf erneut speichern.";
+  authStatus.textContent = "Bitte anmelden, bevor Sie Vertragsparameter bearbeiten oder absenden.";
+  quoteResult.textContent = "Anmeldung erforderlich.";
   authForm?.username?.focus();
   authForm?.scrollIntoView({ behavior: "smooth", block: "center" });
   return false;
+}
+
+function applyAuthGate() {
+  const unlocked = Boolean(getAuthToken());
+  offerFormSection?.querySelectorAll("input, select, textarea, button").forEach((element) => {
+    element.disabled = !unlocked;
+  });
+  submitQuoteButton.disabled = !unlocked;
+  saveDraftButton.disabled = !unlocked;
+  offerFormSection?.classList.toggle("form-locked", !unlocked);
 }
 
 async function saveDraft(draftPayload) {
@@ -328,9 +320,7 @@ async function loadDrafts() {
   }
 
   const response = await fetch(`${CONTRACTS_SERVICE_BASE_URL}/drafts`, {
-    headers: {
-      authorization: `Bearer ${token}`
-    }
+    headers: { authorization: `Bearer ${token}` }
   });
 
   if (!response.ok) {
@@ -365,4 +355,8 @@ function renderDrafts(drafts) {
     item.appendChild(action);
     draftsList.appendChild(item);
   }
+}
+
+function getArray(value) {
+  return Array.isArray(value) ? value : [];
 }
