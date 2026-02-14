@@ -1,3 +1,4 @@
+import { toGermanErrorMessage } from "./errors.js";
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
 const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
@@ -24,7 +25,7 @@ authForm.addEventListener("submit", async (event) => {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || "Login fehlgeschlagen");
+      throw new Error(toGermanErrorMessage(error.error || "Login fehlgeschlagen"));
     }
 
     const session = await response.json();
@@ -32,7 +33,7 @@ authForm.addEventListener("submit", async (event) => {
     authStatus.textContent = `Angemeldet als ${session.user.username} (${session.user.role}).`;
     await loadDrafts();
   } catch (error) {
-    authStatus.textContent = `Fehler: ${error.message}`;
+    authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
   }
 });
 
@@ -40,7 +41,7 @@ loadDraftsButton.addEventListener("click", async () => {
   try {
     await loadDrafts();
   } catch (error) {
-    authStatus.textContent = `Fehler: ${error.message}`;
+    authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
   }
 });
 
@@ -62,7 +63,7 @@ async function loadDrafts() {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Anfragen konnten nicht geladen werden");
+    throw new Error(toGermanErrorMessage(error.error || "Anfragen konnten nicht geladen werden"));
   }
 
   const drafts = await response.json();
@@ -98,7 +99,7 @@ function renderDrafts(drafts) {
         await deleteDraft(draft.id);
         await loadDrafts();
       } catch (error) {
-        authStatus.textContent = `Fehler: ${error.message}`;
+        authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
       }
     });
 
@@ -126,7 +127,7 @@ async function deleteDraft(draftId) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Anfrage konnte nicht gelöscht werden");
+    throw new Error(toGermanErrorMessage(error.error || "Anfrage konnte nicht gelöscht werden"));
   }
 }
 

@@ -1,3 +1,5 @@
+import { toGermanErrorMessage } from "./errors.js";
+
 /**
  * Builds a schema-driven form UI for contract parameters.
  */
@@ -27,7 +29,7 @@ export async function initContractParametersUI({ formRootId, statusId, previewId
       getValue: () => rootNode.getValue() || {}
     };
   } catch (error) {
-    status.textContent = `Fehler beim Laden des Schemas: ${error.message}`;
+    status.textContent = `Fehler beim Laden des Schemas: ${toGermanErrorMessage(error)}`;
     status.classList.add("contract-status-error");
     return { getValue: () => ({}) };
   }

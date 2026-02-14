@@ -1,5 +1,6 @@
 import { formatCurrency } from "./formatters.js";
 import { initContractParametersUI } from "./contract-form.js";
+import { toGermanErrorMessage } from "./errors.js";
 
 const STORAGE_KEY = "salesPortal.latestPricing";
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
@@ -38,7 +39,7 @@ calculatorForm.addEventListener("submit", async (event) => {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || "Pricing request failed");
+      throw new Error(toGermanErrorMessage(error.error || "Pricing request failed"));
     }
 
     const data = await response.json();
@@ -53,7 +54,7 @@ calculatorForm.addEventListener("submit", async (event) => {
     });
     persistPricingContractParameters(getPricingContractParameters());
   } catch (error) {
-    calculatorResult.textContent = `Fehler: ${error.message}`;
+    calculatorResult.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
   }
 });
 
