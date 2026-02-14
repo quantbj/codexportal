@@ -942,15 +942,6 @@
       "minItems": 1,
       "$comment": "Mindestens eine Vertragsposition erforderlich"
     },
-    "market_locations": {
-      "type": "array",
-      "description": "Marktlokationen / Market Locations",
-      "items": {
-        "$ref": "#/$defs/market_location"
-      },
-      "minItems": 1,
-      "$comment": "Mindestens eine Marktlokation erforderlich"
-    },
     "technical_resources": {
       "type": "array",
       "description": "Technische Ressourcen / Technical Resources",
