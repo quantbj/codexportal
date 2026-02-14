@@ -130,6 +130,23 @@ h1 {
   align-items: start;
 }
 
+.pricing-page .hero-content,
+.pricing-page .layout {
+  max-width: 1120px;
+}
+
+.pricing-layout {
+  grid-template-columns: 1fr minmax(360px, 430px);
+}
+
+.pricing-layout .offer-content {
+  order: 1;
+}
+
+.pricing-layout .offer-sidebar {
+  order: 2;
+}
+
 .offer-sidebar {
   display: grid;
   gap: 1rem;
@@ -465,6 +482,11 @@ button:hover {
 
   .offer-layout {
     grid-template-columns: 1fr;
+  }
+
+  .pricing-layout .offer-content,
+  .pricing-layout .offer-sidebar {
+    order: initial;
   }
 
   .offer-sidebar {
