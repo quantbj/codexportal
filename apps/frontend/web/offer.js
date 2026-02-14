@@ -171,7 +171,7 @@ function buildQuotePayload() {
   persistOfferContractParameters(offer);
 
   const customer = deriveCustomer(offer);
-  const asset = deriveAsset(pricing);
+  const asset = deriveAsset(pricing, offer);
 
   return {
     customer,
@@ -196,12 +196,14 @@ function deriveCustomer(offer) {
   return { companyName, contactName, email };
 }
 
-function deriveAsset(pricing) {
+function deriveAsset(pricing, offer) {
   const technicalResources = getArray(pricing.technical_resources);
-  const installedCapacityKWp = technicalResources
+  const technicalResourcesCapacity = technicalResources
     .map((resource) => Number(resource?.installed_capacity))
     .filter((value) => Number.isFinite(value) && value > 0)
     .reduce((total, value) => total + value, 0);
+  const parkCapacity = Number(offer?.park?.cumulative_inverter_capacity);
+  const installedCapacityKWp = technicalResourcesCapacity > 0 ? technicalResourcesCapacity : parkCapacity;
 
   const technologies = technicalResources.map((resource) => resource?.technology).filter(Boolean);
   const hasWind = technologies.includes("wind");
@@ -214,7 +216,7 @@ function deriveAsset(pricing) {
       || pricing?.contract_items?.[0]?.market_premium_eur_per_mwh
       || 5
   );
-  const location = String(pricing?.park?.control_area || pricing?.park?.park_name || "DE").trim();
+  const location = String(offer?.park?.control_area || offer?.park?.park_name || "DE").trim();
 
   if (!Number.isFinite(installedCapacityKWp) || installedCapacityKWp <= 0) {
     throw new Error("Preisparameter enthalten keine gültige installierte Leistung.");

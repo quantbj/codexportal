@@ -1376,6 +1376,44 @@
       },
       "minItems": 0,
       "$comment": "Optional contact persons for the counterparty"
+    },
+    "park": {
+      "type": "object",
+      "required": [
+        "park_name",
+        "control_area"
+      ],
+      "properties": {
+        "park_name": {
+          "type": "string",
+          "description": "Regelzone / Control Area",
+          "$comment": "EVI: LOCATION.C2REGELZONE"
+        },
+        "control_area": {
+          "type": "string",
+          "description": "Regelzone / Control Area",
+          "$comment": "EVI: LOCATION.C2REGELZONE"
+        },
+        "cumulative_inverter_capacity": {
+          "type": "number",
+          "description": "Kumulierte Leistung der Wechselrichter / Cumulative Inverter Capacity",
+          "$comment": "EVI: C2MaxEinspLst.Location"
+        },
+        "unavailability_reporting_level": {
+          "type": "string",
+          "description": "Ebene Nichtverfügbarkeits-Meldung / Unavailability Reporting Level",
+          "$comment": "EVI: C2NVMELDUNG.Location"
+        }
+      }
+    },
+    "metering_points": {
+      "type": "array",
+      "description": "Messzählpunkte / Metering Points",
+      "items": {
+        "$ref": "#/$defs/metering_point"
+      },
+      "minItems": 1,
+      "$comment": "Mindestens ein MZP erforderlich"
     }
   }
 }
