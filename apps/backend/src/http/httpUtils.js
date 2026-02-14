@@ -19,7 +19,8 @@ export function createCorsOriginResolver({
     }
 
     if (configuredOrigins.length === 0) {
-      return incomingOrigin;
+      // Never reflect arbitrary origins if configuration is empty.
+      return defaultOrigin || "*";
     }
 
     if (configuredOrigins.includes("*")) {
@@ -44,6 +45,8 @@ export function sendJson(req, res, statusCode, payload, options) {
     "Content-Type": "application/json",
     "Content-Length": Buffer.byteLength(body),
     "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
     "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": corsOrigin,
     "Access-Control-Allow-Methods": options.allowMethods,
@@ -59,6 +62,8 @@ export function sendPreflight(req, res, options) {
   const corsOrigin = options.resolveCorsOrigin(req);
   res.writeHead(204, {
     "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
     "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": corsOrigin,
     "Access-Control-Allow-Methods": options.allowMethods,

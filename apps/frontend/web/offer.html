@@ -16,6 +16,7 @@
         <a class="nav-link" href="./index.html">Pricing</a>
         <a class="nav-link active" href="./offer.html">Angebot</a>
         <a class="nav-link" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link admin-nav-link nav-hidden" href="./admin.html">Admin</a>
         <a class="nav-link" href="./agb.html">AGB</a>
         <a class="nav-link" href="./impressum.html">Impressum</a>
       </nav>
@@ -39,6 +40,19 @@
             <button type="submit">Anmelden</button>
             <button id="loadDraftsButton" type="button">Anfragen laden</button>
             <button id="logoutButton" type="button">Abmelden</button>
+          </div>
+        </form>
+        <form id="signupForm" class="form-grid">
+          <label>
+            Neuer Benutzername
+            <input name="signupUsername" type="text" placeholder="neukunde1" required>
+          </label>
+          <label>
+            Neues Passwort
+            <input name="signupPassword" type="password" placeholder="mind. 4 Zeichen" required>
+          </label>
+          <div class="form-actions">
+            <button id="signupButton" type="submit">Konto erstellen</button>
           </div>
         </form>
         <p id="authStatus" class="contract-status">Nicht angemeldet.</p>
@@ -86,6 +100,10 @@
     </section>
   </main>
 
+  <script type="module">
+    import { syncAdminNavVisibility } from "./auth-nav.js";
+    syncAdminNavVisibility();
+  </script>
   <script type="module" src="./offer.js"></script>
 </body>
 </html>

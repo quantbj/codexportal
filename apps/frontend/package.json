@@ -7,6 +7,6 @@
     "start": "node server.js",
     "test": "node --test",
     "test:coverage": "bash ../../scripts/coverage-check.sh",
-    "lint": "node --check server.js && node --check web/formatters.js && node --check web/pricing.js && node --check web/offer.js && node --check web/contract-form.js && node --check web/my-requests.js"
+    "lint": "node --check server.js && node --check web/formatters.js && node --check web/pricing.js && node --check web/offer.js && node --check web/contract-form.js && node --check web/my-requests.js && node --check web/admin.js && node --check web/auth-nav.js"
   }
 }

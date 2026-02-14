@@ -1,4 +1,5 @@
 import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
+import { syncAdminNavVisibility } from "./auth-nav.js";
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
 const CONTRACTS_SERVICE_BASE_URL = "https://codexportal-contracts.onrender.com";
 
@@ -8,6 +9,7 @@ const loadDraftsButton = document.getElementById("loadDraftsButton");
 const logoutButton = document.getElementById("logoutButton");
 const draftsList = document.getElementById("draftsList");
 
+await syncAdminNavVisibility();
 restoreAuthStatus();
 
 authForm.addEventListener("submit", async (event) => {
@@ -30,6 +32,7 @@ authForm.addEventListener("submit", async (event) => {
     const session = await response.json();
     localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
     authStatus.textContent = `Angemeldet als ${session.user.username} (${session.user.role}).`;
+    await syncAdminNavVisibility();
     await loadDrafts();
   } catch (error) {
     authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
@@ -44,10 +47,12 @@ loadDraftsButton.addEventListener("click", async () => {
   }
 });
 
-logoutButton.addEventListener("click", () => {
+logoutButton.addEventListener("click", async () => {
+  await logoutFromContractsService();
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   draftsList.innerHTML = "";
   authStatus.textContent = "Nicht angemeldet.";
+  await syncAdminNavVisibility();
 });
 
 async function loadDrafts() {
@@ -66,6 +71,22 @@ async function loadDrafts() {
 
   const drafts = await response.json();
   renderDrafts(drafts);
+}
+
+async function logoutFromContractsService() {
+  const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  if (!token) {
+    return;
+  }
+
+  try {
+    await fetch(`${CONTRACTS_SERVICE_BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` }
+    });
+  } catch {
+    // Local logout should still complete even if server logout is unavailable.
+  }
 }
 
 function renderDrafts(drafts) {

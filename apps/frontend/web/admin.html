@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | Direktvermarktung Sales Portal</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="offer-page">
+  <header class="hero hero-compact">
+    <div class="hero-content">
+      <p class="kicker">Direktvermarktung Strom</p>
+      <h1>Benutzerverwaltung</h1>
+      <p>Nur für Superuser: Benutzerkonten anlegen, Passwörter zurücksetzen und Konten entfernen.</p>
+      <nav class="top-nav" aria-label="Seitennavigation">
+        <a class="nav-link" href="./index.html">Pricing</a>
+        <a class="nav-link" href="./offer.html">Angebot</a>
+        <a class="nav-link" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link admin-nav-link active nav-hidden" href="./admin.html">Admin</a>
+        <a class="nav-link" href="./agb.html">AGB</a>
+        <a class="nav-link" href="./impressum.html">Impressum</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout offer-layout">
+    <aside class="offer-sidebar">
+      <section class="panel">
+        <p class="sidebar-title">Sitzung</p>
+        <div class="form-actions">
+          <button id="refreshUsersButton" type="button">Aktualisieren</button>
+          <button id="logoutButton" type="button">Abmelden</button>
+        </div>
+        <p id="adminStatus" class="contract-status">Prüfe Berechtigung ...</p>
+      </section>
+
+      <section class="panel">
+        <p class="sidebar-title">Neuen Benutzer anlegen</p>
+        <form id="createUserForm" class="form-grid">
+          <label>
+            Benutzername
+            <input name="username" type="text" required>
+          </label>
+          <label>
+            Passwort
+            <input name="password" type="password" required>
+          </label>
+          <label>
+            Rolle
+            <select name="role">
+              <option value="customer">Customer</option>
+              <option value="superuser">Superuser</option>
+            </select>
+          </label>
+          <div class="form-actions">
+            <button type="submit">Benutzer anlegen</button>
+          </div>
+        </form>
+      </section>
+    </aside>
+
+    <section class="offer-content">
+      <section class="panel form-card">
+        <h2>Benutzerliste</h2>
+        <div id="adminUsersList" class="drafts-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

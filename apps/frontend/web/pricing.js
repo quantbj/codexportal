@@ -1,6 +1,7 @@
 import { formatCurrency } from "./formatters.js";
 import { initContractParametersUI } from "./contract-form.js";
 import { toGermanApiError, toGermanErrorMessage } from "./errors.js";
+import { syncAdminNavVisibility } from "./auth-nav.js";
 
 const PRICING_SCHEMA_STORAGE_KEY = "salesPortal.contractParameters.pricing";
 const AUTH_TOKEN_STORAGE_KEY = "salesPortal.authToken";
@@ -16,6 +17,7 @@ const pricingFormSection = document.getElementById("pricingFormSection");
 let getPricingContractParameters = () => ({});
 
 await initializePricingContractSchema();
+await syncAdminNavVisibility();
 applyAuthGate();
 restoreAuthStatus();
 
@@ -24,9 +26,11 @@ authForm?.addEventListener("submit", async (event) => {
   await login();
 });
 
-logoutButton?.addEventListener("click", () => {
+logoutButton?.addEventListener("click", async () => {
+  await logoutFromContractsService();
   localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   authStatus.textContent = "Nicht angemeldet.";
+  await syncAdminNavVisibility();
   applyAuthGate();
 });
 
@@ -87,6 +91,7 @@ async function login() {
     const session = await response.json();
     localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
     authStatus.textContent = `Angemeldet als ${session.user.username} (${session.user.role}).`;
+    await syncAdminNavVisibility();
     applyAuthGate();
   } catch (error) {
     authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
@@ -95,6 +100,22 @@ async function login() {
 
 function getAuthToken() {
   return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
+}
+
+async function logoutFromContractsService() {
+  const token = getAuthToken();
+  if (!token) {
+    return;
+  }
+
+  try {
+    await fetch(`${CONTRACTS_SERVICE_BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}` }
+    });
+  } catch {
+    // Local logout should still complete even if server logout is unavailable.
+  }
 }
 
 function ensureAuthenticated() {

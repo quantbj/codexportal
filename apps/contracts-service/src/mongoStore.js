@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { MongoClient } from "mongodb";
+import { hashPassword } from "./security/passwords.js";
 
 /**
  * MongoDB-backed persistence for users and draft contracts.
@@ -46,6 +47,48 @@ export class MongoStore {
 
   async getUserById(userId) {
     return this.users.findOne({ id: userId });
+  }
+
+  async listUsers() {
+    return this.users.find({}).sort({ username: 1 }).toArray();
+  }
+
+  async createUser({ username, password, role = "customer" }) {
+    validateUserInput({ username, password, role });
+    const created = { id: randomUUID(), username, password: hashPassword(password), role };
+
+    try {
+      await this.users.insertOne(created);
+    } catch (error) {
+      if (error?.code === 11000) {
+        throw new Error("Username already exists");
+      }
+      throw error;
+    }
+
+    return created;
+  }
+
+  async deleteUserById(id) {
+    const result = await this.users.deleteOne({ id });
+    if (result.deletedCount > 0) {
+      await this.drafts.deleteMany({ ownerUserId: id });
+      return true;
+    }
+    return false;
+  }
+
+  async updateUserPassword(id, password) {
+    if (!password || password.trim().length < 4) {
+      throw new Error("Password must have at least 4 characters");
+    }
+
+    const result = await this.users.findOneAndUpdate(
+      { id },
+      { $set: { password: hashPassword(password) } },
+      { returnDocument: "after" }
+    );
+    return result || null;
   }
 
   async saveDraft({ id, ownerUserId, schemaVersion, payload }) {
@@ -102,9 +145,23 @@ export class MongoStore {
     }
 
     await this.users.insertMany([
-      { id: "u-customer-1", username: "customer1", password: "customer1", role: "customer" },
-      { id: "u-customer-2", username: "customer2", password: "customer2", role: "customer" },
-      { id: "u-super-1", username: "admin", password: "admin", role: "superuser" }
+      { id: "u-customer-1", username: "customer1", password: hashPassword("customer1"), role: "customer" },
+      { id: "u-customer-2", username: "customer2", password: hashPassword("customer2"), role: "customer" },
+      { id: "u-super-1", username: "admin", password: hashPassword("admin"), role: "superuser" }
     ]);
+  }
+}
+
+function validateUserInput({ username, password, role }) {
+  if (!username || username.trim().length < 3) {
+    throw new Error("Username must have at least 3 characters");
+  }
+
+  if (!password || password.trim().length < 4) {
+    throw new Error("Password must have at least 4 characters");
+  }
+
+  if (!["customer", "superuser"].includes(role)) {
+    throw new Error("Invalid role");
   }
 }

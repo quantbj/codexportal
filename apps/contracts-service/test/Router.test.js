@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 
 import { createRouter } from "../src/router.js";
+import { createAuthRateLimiter } from "../src/security/authRateLimiter.js";
 
 const EXPECTED_CORS_ORIGIN = "https://codexportal-frontend.onrender.com";
 
@@ -22,6 +23,51 @@ function createMemoryStore({ ready = true, throwOnReady = false } = {}) {
     },
     getUserById(id) {
       return usersById.get(id) || null;
+    },
+    listUsers() {
+      return [...users];
+    },
+    createUser({ username, password, role = "customer" }) {
+      if (!username || username.length < 3) {
+        throw new Error("Username must have at least 3 characters");
+      }
+      if (!password || password.length < 4) {
+        throw new Error("Password must have at least 4 characters");
+      }
+      if (usersByUsername.has(username)) {
+        throw new Error("Username already exists");
+      }
+      const created = {
+        id: `u-${users.length + 1}`,
+        username,
+        password,
+        role
+      };
+      users.push(created);
+      usersByUsername.set(created.username, created);
+      usersById.set(created.id, created);
+      return created;
+    },
+    deleteUserById(id) {
+      const index = users.findIndex((user) => user.id === id);
+      if (index === -1) {
+        return false;
+      }
+      const [deleted] = users.splice(index, 1);
+      usersByUsername.delete(deleted.username);
+      usersById.delete(deleted.id);
+      return true;
+    },
+    updateUserPassword(id, password) {
+      if (!password || password.length < 4) {
+        throw new Error("Password must have at least 4 characters");
+      }
+      const user = usersById.get(id) || null;
+      if (!user) {
+        return null;
+      }
+      user.password = password;
+      return user;
     },
     saveDraft({ id, ownerUserId, schemaVersion, payload }) {
       if (id) {
@@ -147,14 +193,14 @@ test("contracts-service validates auth and JSON", async () => {
   const router = createRouter({ store: createMemoryStore() });
 
   const noAuth = await invokeRoute(router, { method: "GET", url: "/drafts" });
-  assert.equal(noAuth.statusCode, 400);
+  assert.equal(noAuth.statusCode, 401);
 
   const badLogin = await invokeRoute(router, {
     method: "POST",
     url: "/auth/login",
     payload: { username: "customer1", password: "wrong" }
   });
-  assert.equal(badLogin.statusCode, 400);
+  assert.equal(badLogin.statusCode, 401);
 
   const health = await invokeRoute(router, { method: "GET", url: "/health" });
   assert.equal(health.statusCode, 200);
@@ -163,6 +209,14 @@ test("contracts-service validates auth and JSON", async () => {
   const ready = await invokeRoute(router, { method: "GET", url: "/ready" });
   assert.equal(ready.statusCode, 200);
   assert.equal(ready.body.status, "ok");
+
+  const signup = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/signup",
+    payload: { username: "newcustomer", password: "newcustomer" }
+  });
+  assert.equal(signup.statusCode, 201);
+  assert.equal(signup.body.user.role, "customer");
 });
 
 test("contracts-service returns 503 when readiness check fails", async () => {
@@ -174,6 +228,12 @@ test("contracts-service returns 503 when readiness check fails", async () => {
   const throwingRouter = createRouter({ store: createMemoryStore({ throwOnReady: true }) });
   const throwingResponse = await invokeRoute(throwingRouter, { method: "GET", url: "/ready" });
   assert.equal(throwingResponse.statusCode, 503);
+
+  const noReadinessStore = createMemoryStore();
+  delete noReadinessStore.isReady;
+  const noReadinessRouter = createRouter({ store: noReadinessStore });
+  const noReadinessResponse = await invokeRoute(noReadinessRouter, { method: "GET", url: "/ready" });
+  assert.equal(noReadinessResponse.statusCode, 200);
 });
 
 test("contracts-service supports me endpoint, draft update, and not-found handling", async () => {
@@ -241,6 +301,98 @@ test("contracts-service supports me endpoint, draft update, and not-found handli
   assert.equal(afterDelete.statusCode, 404);
 });
 
+test("contracts-service supports admin user management", async () => {
+  const router = createRouter({ store: createMemoryStore() });
+
+  const adminLogin = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "admin", password: "admin" }
+  });
+  const adminToken = adminLogin.body.token;
+
+  const createUser = await invokeRoute(router, {
+    method: "POST",
+    url: "/admin/users",
+    authorization: `Bearer ${adminToken}`,
+    payload: { username: "managed1", password: "managed1", role: "customer" }
+  });
+  assert.equal(createUser.statusCode, 201);
+
+  const listUsers = await invokeRoute(router, {
+    method: "GET",
+    url: "/admin/users",
+    authorization: `Bearer ${adminToken}`
+  });
+  assert.equal(listUsers.statusCode, 200);
+  assert.ok(listUsers.body.users.some((user) => user.username === "managed1"));
+
+  const reset = await invokeRoute(router, {
+    method: "POST",
+    url: `/admin/users/${createUser.body.user.id}/reset-password`,
+    authorization: `Bearer ${adminToken}`,
+    payload: { password: "changed1" }
+  });
+  assert.equal(reset.statusCode, 200);
+
+  const deleteUser = await invokeRoute(router, {
+    method: "DELETE",
+    url: `/admin/users/${createUser.body.user.id}`,
+    authorization: `Bearer ${adminToken}`
+  });
+  assert.equal(deleteUser.statusCode, 200);
+
+  const missingReset = await invokeRoute(router, {
+    method: "POST",
+    url: "/admin/users/not-existing/reset-password",
+    authorization: `Bearer ${adminToken}`,
+    payload: { password: "changed1" }
+  });
+  assert.equal(missingReset.statusCode, 404);
+
+  const missingDelete = await invokeRoute(router, {
+    method: "DELETE",
+    url: "/admin/users/not-existing",
+    authorization: `Bearer ${adminToken}`
+  });
+  assert.equal(missingDelete.statusCode, 404);
+
+  const resetOwn = await invokeRoute(router, {
+    method: "POST",
+    url: "/admin/users/su/reset-password",
+    authorization: `Bearer ${adminToken}`,
+    payload: { password: "changed1" }
+  });
+  assert.equal(resetOwn.statusCode, 403);
+
+  const deleteOwn = await invokeRoute(router, {
+    method: "DELETE",
+    url: "/admin/users/su",
+    authorization: `Bearer ${adminToken}`
+  });
+  assert.equal(deleteOwn.statusCode, 403);
+
+  const duplicateSignup = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/signup",
+    payload: { username: "customer1", password: "customer1" }
+  });
+  assert.equal(duplicateSignup.statusCode, 409);
+
+  const customerLogin = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "customer1", password: "customer1" }
+  });
+  const customerToken = customerLogin.body.token;
+  const forbidden = await invokeRoute(router, {
+    method: "GET",
+    url: "/admin/users",
+    authorization: `Bearer ${customerToken}`
+  });
+  assert.equal(forbidden.statusCode, 403);
+});
+
 test("contracts-service handles preflight, invalid JSON and unknown route", async () => {
   const router = createRouter({ store: createMemoryStore() });
 
@@ -273,7 +425,7 @@ test("contracts-service handles preflight, invalid JSON and unknown route", asyn
     method: "POST",
     url: "/auth/login"
   });
-  assert.equal(missingBodyLogin.statusCode, 400);
+  assert.equal(missingBodyLogin.statusCode, 422);
   assert.equal(missingBodyLogin.body.error, "Request body is required");
 
   const oversizedReq = Readable.from(["x".repeat((1024 * 1024) + 1)]);
@@ -298,6 +450,52 @@ test("contracts-service handles preflight, invalid JSON and unknown route", asyn
 
   const unknown = await invokeRoute(router, { method: "GET", url: "/unknown" });
   assert.equal(unknown.statusCode, 404);
+});
+
+test("contracts-service supports explicit logout and blocks logged-out sessions", async () => {
+  const router = createRouter({ store: createMemoryStore() });
+  const login = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "customer1", password: "customer1" }
+  });
+  const token = login.body.token;
+
+  const logout = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/logout",
+    authorization: `Bearer ${token}`
+  });
+  assert.equal(logout.statusCode, 200);
+  assert.equal(logout.body.loggedOut, true);
+
+  const meAfterLogout = await invokeRoute(router, {
+    method: "GET",
+    url: "/auth/me",
+    authorization: `Bearer ${token}`
+  });
+  assert.equal(meAfterLogout.statusCode, 401);
+});
+
+test("contracts-service rate limits repeated failed logins", async () => {
+  const router = createRouter({
+    store: createMemoryStore(),
+    authRateLimiter: createAuthRateLimiter({ maxAttempts: 1, windowMs: 60_000 })
+  });
+
+  const firstFailure = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "customer1", password: "wrong" }
+  });
+  assert.equal(firstFailure.statusCode, 401);
+
+  const secondFailure = await invokeRoute(router, {
+    method: "POST",
+    url: "/auth/login",
+    payload: { username: "customer1", password: "wrong" }
+  });
+  assert.equal(secondFailure.statusCode, 429);
 });
 
 test("contracts-service prevents deleting drafts from another customer", async () => {
@@ -369,7 +567,7 @@ test("contracts-service supports multi-origin and wildcard CORS configuration", 
       url: "/health",
       origin: "https://dynamic-origin.example"
     });
-    assert.equal(emptyConfig.headers["Access-Control-Allow-Origin"], "https://dynamic-origin.example");
+    assert.equal(emptyConfig.headers["Access-Control-Allow-Origin"], EXPECTED_CORS_ORIGIN);
   } finally {
     process.env.FRONTEND_ORIGIN = previous;
   }

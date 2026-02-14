@@ -16,6 +16,7 @@
         <a class="nav-link" href="./index.html">Pricing</a>
         <a class="nav-link" href="./offer.html">Angebot</a>
         <a class="nav-link" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link admin-nav-link nav-hidden" href="./admin.html">Admin</a>
         <a class="nav-link active" href="./agb.html">AGB</a>
         <a class="nav-link" href="./impressum.html">Impressum</a>
       </nav>
@@ -40,5 +41,9 @@
       <p>Es gilt deutsches Recht. Gerichtsstand ist, soweit zulässig, der Sitz des Anbieters.</p>
     </section>
   </main>
+  <script type="module">
+    import { syncAdminNavVisibility } from "./auth-nav.js";
+    syncAdminNavVisibility();
+  </script>
 </body>
 </html>
