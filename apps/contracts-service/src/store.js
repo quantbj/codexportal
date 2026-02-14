@@ -98,6 +98,13 @@ export class Store {
     writeJson(this.draftsFile, this.drafts);
     return true;
   }
+
+  /**
+   * File-based fallback is always locally reachable when process is running.
+   */
+  async isReady() {
+    return true;
+  }
 }
 
 function ensureDataFiles(dataDir, usersFile, draftsFile) {

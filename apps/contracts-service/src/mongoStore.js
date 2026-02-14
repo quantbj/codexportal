@@ -87,6 +87,14 @@ export class MongoStore {
     return result.deletedCount > 0;
   }
 
+  /**
+   * Active readiness probe against MongoDB connection.
+   */
+  async isReady() {
+    await this.db.command({ ping: 1 });
+    return true;
+  }
+
   async ensureDemoUsers() {
     const count = await this.users.countDocuments();
     if (count > 0) {

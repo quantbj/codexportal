@@ -40,6 +40,8 @@ npm run test:coverage
 - Contract drafts are persisted in MongoDB when `MONGODB_URI` is set.
 - Without `MONGODB_URI`, contracts-service falls back to `apps/contracts-service/data/drafts.json`.
 - Service URL: `http://localhost:3020`
+- Liveness endpoint: `GET /health` (process alive)
+- Readiness endpoint: `GET /ready` (persistence reachable)
 - Auth model: bearer token from `/auth/login`.
 - Role model:
   - `customer`: own drafts only

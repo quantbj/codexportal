@@ -6,7 +6,7 @@ import { createRouter } from "../src/router.js";
 
 const EXPECTED_CORS_ORIGIN = "https://codexportal-frontend.onrender.com";
 
-function createMemoryStore() {
+function createMemoryStore({ ready = true, throwOnReady = false } = {}) {
   const users = [
     { id: "u1", username: "customer1", password: "customer1", role: "customer" },
     { id: "u2", username: "customer2", password: "customer2", role: "customer" },
@@ -54,6 +54,12 @@ function createMemoryStore() {
       }
       drafts.splice(index, 1);
       return true;
+    },
+    async isReady() {
+      if (throwOnReady) {
+        throw new Error("db down");
+      }
+      return ready;
     }
   };
 }
@@ -153,6 +159,21 @@ test("contracts-service validates auth and JSON", async () => {
   const health = await invokeRoute(router, { method: "GET", url: "/health" });
   assert.equal(health.statusCode, 200);
   assert.equal(health.headers["Access-Control-Allow-Origin"], EXPECTED_CORS_ORIGIN);
+
+  const ready = await invokeRoute(router, { method: "GET", url: "/ready" });
+  assert.equal(ready.statusCode, 200);
+  assert.equal(ready.body.status, "ok");
+});
+
+test("contracts-service returns 503 when readiness check fails", async () => {
+  const downRouter = createRouter({ store: createMemoryStore({ ready: false }) });
+  const downResponse = await invokeRoute(downRouter, { method: "GET", url: "/ready" });
+  assert.equal(downResponse.statusCode, 503);
+  assert.equal(downResponse.body.error, "Persistence unavailable");
+
+  const throwingRouter = createRouter({ store: createMemoryStore({ throwOnReady: true }) });
+  const throwingResponse = await invokeRoute(throwingRouter, { method: "GET", url: "/ready" });
+  assert.equal(throwingResponse.statusCode, 503);
 });
 
 test("contracts-service supports me endpoint, draft update, and not-found handling", async () => {

@@ -28,6 +28,17 @@ export function createRouter(dependencies = {}) {
         return;
       }
 
+      if (req.method === "GET" && req.url === "/ready") {
+        const ready = await checkStoreReadiness(store);
+        if (!ready) {
+          sendJson(req, res, 503, { status: "error", error: "Persistence unavailable" }, corsOptions);
+          return;
+        }
+
+        sendJson(req, res, 200, { status: "ok" }, corsOptions);
+        return;
+      }
+
       if (req.method === "POST" && req.url === "/auth/login") {
         const payload = await parseJsonBody(req);
         const session = await auth.login(payload.username, payload.password);
@@ -111,4 +122,16 @@ export function createRouter(dependencies = {}) {
 
 function canAccessDraft(user, draft) {
   return user.role === "superuser" || draft.ownerUserId === user.id;
+}
+
+async function checkStoreReadiness(store) {
+  if (typeof store.isReady !== "function") {
+    return true;
+  }
+
+  try {
+    return await store.isReady();
+  } catch {
+    return false;
+  }
 }

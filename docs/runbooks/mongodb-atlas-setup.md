@@ -53,8 +53,9 @@ Then redeploy `contracts-service`.
 ## 7. Verify
 
 1. Open `https://<contracts-service>/health` and confirm `{"status":"ok"}`.
-2. Log in via portal and save a draft.
-3. In Atlas `Browse Collections`, verify documents are created in:
+2. Open `https://<contracts-service>/ready` and confirm `{"status":"ok"}`.
+3. Log in via portal and save a draft.
+4. In Atlas `Browse Collections`, verify documents are created in:
    - `sales_portal.users`
    - `sales_portal.drafts`
 
