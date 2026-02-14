@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pricing | Direktvermarktung Sales Portal</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="pricing-page">
+  <header class="hero hero-compact">
+    <div class="hero-content hero-grid">
+      <div>
+        <p class="kicker">Direktvermarktung Strom</p>
+        <h1>Ertragspotenzial berechnen</h1>
+        <p>Berechnen Sie in wenigen Schritten eine fundierte Erlösprognose für Ihre Anlage.</p>
+        <nav class="top-nav" aria-label="Seitennavigation">
+          <a class="nav-link active" href="./index.html">Pricing</a>
+          <a class="nav-link" href="./offer.html">Angebot</a>
+          <a class="nav-link" href="./my-requests.html">Meine Anfragen</a>
+          <a class="nav-link" href="./agb.html">AGB</a>
+          <a class="nav-link" href="./impressum.html">Impressum</a>
+        </nav>
+      </div>
+      <figure class="hero-figure">
+        <img src="./hero-photo.jpg" alt="He Dreiht wind farm in the North Sea">
+        <figcaption class="hero-caption">
+          Foto: EnBW / O. Tzipka (He Dreiht)
+        </figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <main class="layout offer-layout">
+    <aside class="offer-sidebar">
+      <section class="panel">
+        <p class="sidebar-title">Ablauf</p>
+        <ol class="process-list">
+          <li><strong>Anlagedaten eingeben</strong><span>Leistung, Erzeugung und Profil hinterlegen.</span></li>
+          <li><strong>Preis berechnen</strong><span>Nettoerlöspotenzial auf Basis Ihrer Werte ermitteln.</span></li>
+          <li><strong>Angebot starten</strong><span>Die Daten direkt in die Angebotsseite übernehmen.</span></li>
+        </ol>
+      </section>
+
+      <section class="panel steps">
+        <h2>Ihr Vorteil</h2>
+        <ol>
+          <li>Transparente Kalkulation in Sekunden.</li>
+          <li>Werte werden für die Angebotsanfrage gespeichert.</li>
+          <li>Schneller Übergang zum Vertragsangebot.</li>
+        </ol>
+      </section>
+    </aside>
+
+    <section class="offer-content">
+      <section class="panel form-card">
+        <h2>Anlagendaten für die Preisberechnung</h2>
+        <p class="section-intro">Diese Eingaben werden für die Angebotsseite vorbelegt.</p>
+        <form id="calculatorForm" class="form-grid">
+          <label>
+            Jahreserzeugung (MWh)
+            <input name="annualGenerationMWh" type="number" min="1" value="400" required>
+          </label>
+          <label>
+            Leistung (kWp)
+            <input name="installedCapacityKWp" type="number" min="1" value="500" required>
+          </label>
+          <label>
+            Marktprämie (EUR/MWh)
+            <input name="marketPremiumEurPerMWh" type="number" value="5" required>
+          </label>
+          <label>
+            Profil
+            <select name="profileType">
+              <option value="mixed">Mixed</option>
+              <option value="baseLoad">Base Load</option>
+              <option value="peakLoad">Peak Load</option>
+            </select>
+          </label>
+          <div class="form-actions">
+            <button type="submit">Preis berechnen</button>
+            <a class="button-link secondary" href="./offer.html">Weiter zur Angebotsseite</a>
+          </div>
+        </form>
+        <p id="calculatorResult" class="result"></p>
+      </section>
+
+      <section class="panel form-card">
+        <h2>Preisrelevante Vertragsparameter</h2>
+        <p class="section-intro">Felder werden aus <code>contract-pricing.json</code> erzeugt.</p>
+        <p id="pricingSchemaStatus" class="contract-status">Lade Vertragsschema ...</p>
+        <div id="pricingSchemaForm"></div>
+        <pre id="pricingJsonPreview" class="contract-preview">{}</pre>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./pricing.js"></script>
+</body>
+</html>

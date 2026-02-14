@@ -1,0 +1,1381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/contract-offer-parameters",
+  "title": "Contract Offer Parameters",
+  "type": "object",
+  "$defs": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "description": "Land / Country",
+          "$comment": "EVI: CountryKey.Address"
+        },
+        "federal_state": {
+          "type": "string",
+          "description": "Bundesland / Federal State",
+          "$comment": "EVI: C2StreetNbrAdd.Installation"
+        },
+        "zip_code": {
+          "type": "string",
+          "description": "PLZ / ZIP Code",
+          "$comment": "EVI: ZIPKey.Address"
+        },
+        "city": {
+          "type": "string",
+          "description": "Ort / City",
+          "$comment": "EVI: C2City.Installation"
+        },
+        "street_or_po_box": {
+          "type": "string",
+          "description": "Straße / Postfach / Street or PO Box",
+          "$comment": "EVI: Street.Address"
+        },
+        "street_number": {
+          "type": "string",
+          "description": "Hausnummer / Street Number",
+          "$comment": "EVI: StreetNumber.Address"
+        },
+        "street_number_addition": {
+          "type": "string",
+          "description": "Hnr-Erg / Street Number Addition",
+          "$comment": "EVI: C2StreetNbrAdd.Installation"
+        }
+      }
+    },
+    "communication": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "Telefon / Phone",
+          "$comment": "EVI: ComposedPhone.Telecom"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "E-Mail / Email",
+          "$comment": "EVI: Email.Telecom"
+        }
+      }
+    },
+    "remuneration_configuration": {
+      "type": "object",
+      "required": [
+        "regime",
+        "share_percentage",
+        "feed_in_remuneration",
+        "dv_entgelt",
+        "market_based_compensation"
+      ],
+      "properties": {
+        "regime": {
+          "type": "string",
+          "enum": [
+            "Fix",
+            "MW",
+            "Spot"
+          ],
+          "description": "Fix/MW/Spot",
+          "$comment": "Pflichtfeld für jede Vergütungskonfiguration"
+        },
+        "share_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Anteil [%] / Share Percentage",
+          "$comment": "Summe aller Anteile muss 100% ergeben"
+        },
+        "feed_in_remuneration": {
+          "type": "object",
+          "description": "Einspeisevergütung / Feed-in Remuneration",
+          "required": [
+            "price",
+            "dle_deduction"
+          ],
+          "properties": {
+            "price": {
+              "type": "number",
+              "description": "Preis [€/MWh] / Price",
+              "$comment": "Einspeisevergütung Preis"
+            },
+            "dle_deduction": {
+              "type": "boolean",
+              "description": "DLE-Abzug (ja/nein) / DLE Deduction (yes/no)",
+              "$comment": "Direktvermarktungsentgelt-Abzug"
+            }
+          }
+        },
+        "floor": {
+          "type": "object",
+          "description": "Floor / Floor",
+          "required": [
+            "floor_reference",
+            "floor_amount"
+          ],
+          "properties": {
+            "floor_reference": {
+              "type": "string",
+              "description": "Floor Referenz / Floor Reference"
+            },
+            "floor_amount": {
+              "type": "number",
+              "description": "Floor Zahl [€/MWh] / Floor Amount"
+            }
+          }
+        },
+        "threshold": {
+          "type": "object",
+          "description": "Schwellwert / Threshold",
+          "required": [
+            "reference_index_for_threshold",
+            "threshold_at_index_prices_below",
+            "deviating_remuneration_type",
+            "dle_deduction"
+          ],
+          "properties": {
+            "reference_index_for_threshold": {
+              "type": "string",
+              "enum": [
+                "DELU_EPEX_DA_15min",
+                "DELU_EPEX_DA_60min"
+              ],
+              "description": " / Reference Index for the Threshold"
+            },
+            "threshold_at_index_prices_below": {
+              "type": "number",
+              "description": "Schwellwert - bei Spotmarktpreisen < [€/MWh] / Threshold at Spot Prices Below"
+            },
+            "deviating_remuneration_type": {
+              "type": "string",
+              "enum": [
+                "AW",
+                "DELU_EPEX_DA_15min",
+                "DELU_EPEX_DA_60min",
+                "DE_NT_MW-PV_M",
+                "Max_AW_MW",
+                "Zahl"
+              ],
+              "description": "Abweichende Vergütung Art / Deviating Remuneration Type"
+            },
+            "deviating_remuneration_amount": {
+              "type": "number",
+              "description": "Abweichende Vergütung Zahl / Deviating Remuneration Amount",
+              "$comment": "Genau dann zu befüllen, falls deviating_remuneration_type == Zahl"
+            },
+            "dle_deduction": {
+              "type": "boolean",
+              "description": "DLE-Abzug (ja/nein) / DLE Deduction",
+              "$comment": ""
+            }
+          }
+        },
+        "p51": {
+          "type": "object",
+          "description": "p51 / p51",
+          "required": [
+            "deviating_remuneration_type",
+            "dle_deduction"
+          ],
+          "properties": {
+            "deviating_remuneration_type": {
+              "type": "string",
+              "enum": [
+                "AW",
+                "DELU_EPEX_DA_15min",
+                "DELU_EPEX_DA_60min",
+                "DE_NT_MW-PV_M",
+                "Max_AW_MW",
+                "Zahl"
+              ],
+              "description": "Abweichende Vergütung Art / Deviating Remuneration Type"
+            },
+            "deviating_remuneration_amount": {
+              "type": "number",
+              "description": "Abweichende Vergütung Zahl / Deviating Remuneration Amount",
+              "$comment": "Genau dann zu befüllen, falls deviating_remuneration_type == Zahl"
+            },
+            "dle_deduction": {
+              "type": "boolean",
+              "description": "DLE-Abzug (ja/nein) / DLE Deduction"
+            }
+          }
+        },
+        "dv_entgelt": {
+          "type": "object",
+          "description": "DV Entgelt / Direct Marketing Fee",
+          "required": [
+            "dle_fix",
+            "dle_factor_dynamic",
+            "dle_floor_minimum_fee",
+            "dle_per_month_net"
+          ],
+          "properties": {
+            "dle_fix": {
+              "type": "number",
+              "description": "DLE Fix [€/MWh] / DLE Fixed"
+            },
+            "dle_factor_dynamic": {
+              "type": "number",
+              "minimum": 0,
+              "description": "dynamisches DLE_Faktor [%] / Dynamic DLE Factor",
+              "$comment": "Kein dynamischer Faktor => 0"
+            },
+            "dle_dynamic_index": {
+              "type": "string",
+              "enum": [
+                "DELU_EPEX_DA_15min",
+                "DELU_EPEX_DA_60min",
+                "DE_NT_MB_M",
+                "DE_NT_MW-PV_M"
+              ],
+              "description": "Index für das dynamische Index",
+              "$comment": "Genau dann zu befüllen, falls deviating_remuneration_type == Zahl"
+            },
+            "dle_floor_minimum_fee": {
+              "type": "number",
+              "description": "DLE floor (Mindest-entgelt) / DLE Floor (Minimum Fee)",
+              "$comment": "Kein Mindestentgelt => 0"
+            },
+            "dle_per_month_net": {
+              "type": "number",
+              "description": "DLE pro Monat in EUR (netto, ohne Provision) / DLE per Month in EUR (net, without provision)",
+              "$comment": "Kein monatliches DLE => 0"
+            }
+          }
+        },
+        "market_based_compensation": {
+          "type": "object",
+          "description": "marktbedingte Kompensation / Market-based Compensation",
+          "properties": {
+            "compensation_type": {
+              "type": "string",
+              "enum": [
+                "AW",
+                "DELU_EPEX_DA_15min",
+                "DELU_EPEX_DA_60min",
+                "DE_NT_MW-PV_M",
+                "Max_AW_MW",
+                "Zahl",
+                "wie_Einspeisevergütung"
+              ],
+              "description": "Kompensation Art / Compensation Type"
+            },
+            "compensation_type_amount": {
+              "type": "number",
+              "description": "Kompensation Art / Compensation Type",
+              "$comment": "Genau dann zu befüllen, wenn compensation_type == Zahl"
+            },
+            "dle_deduction": {
+              "type": "boolean",
+              "description": "DLE-Abzug (ja/nein) / DLE Deduction"
+            },
+            "deviating_compensation_below_threshold": {
+              "type": "object",
+              "description": "Abweichende Kompensation unterhalb Schwellwert? / Deviating Compensation Below Threshold?",
+              "required": [
+                "reference_index_for_threshold",
+                "threshold_at_index_prices_below",
+                "deviating_compensation_type",
+                "dle_deduction_deviating"
+              ],
+              "properties": {
+                "reference_index_for_threshold": {
+                  "type": "string",
+                  "enum": [
+                    "DELU_EPEX_DA_15min",
+                    "DELU_EPEX_DA_60min"
+                  ],
+                  "description": " / Reference Index for the Threshold"
+                },
+                "threshold_at_index_prices_below": {
+                  "type": "number",
+                  "description": "Schwellwert - bei Spotmarktpreisen < [€/MWh] / Threshold at Spot Prices Below"
+                },
+                "deviating_compensation_type": {
+                  "type": "string",
+                  "enum": [
+                    "AW",
+                    "DELU_EPEX_DA_15min",
+                    "DELU_EPEX_DA_60min",
+                    "DE_NT_MW-PV_M",
+                    "Max_AW_MW",
+                    "Zahl"
+                  ],
+                  "description": "Abweichende Kompensation Art / Deviating Compensation Type"
+                },
+                "deviating_compensation_amount": {
+                  "type": "number",
+                  "description": "Abweichende Kompensation Zahl / Deviating Compensation Amount",
+                  "$comment": "Genau dann zu befüllen, falls deviating_compensation_type == Zahl"
+                },
+                "dle_deduction_deviating": {
+                  "type": "boolean",
+                  "description": "DLE-Abzug (ja/nein) / DLE Deduction"
+                }
+              }
+            },
+            "deviating_compensation_at_p51": {
+              "type": "object",
+              "description": "Abweichende Kompensation bei § 51? / Deviating Compensation at § 51?",
+              "required": [
+                "deviating_compensation_type",
+                "dle_deduction"
+              ],
+              "properties": {
+                "deviating_compensation_type": {
+                  "type": "string",
+                  "enum": [
+                    "AW",
+                    "DELU_EPEX_DA_15min",
+                    "DELU_EPEX_DA_60min",
+                    "DE_NT_MW-PV_M",
+                    "Max_AW_MW",
+                    "Zahl"
+                  ],
+                  "description": "Abweichende Kompensation Art / Deviating Compensation Type"
+                },
+                "deviating_compensation_amount": {
+                  "type": "number",
+                  "description": "Abweichende Kompensation Zahl / Deviating Compensation Amount",
+                  "$comment": "Genau dann zu befüllen, falls deviating_compensation_type == Zahl"
+                },
+                "dle_deduction": {
+                  "type": "boolean",
+                  "description": "DLE-Abzug (ja/nein) / DLE Deduction"
+                }
+              }
+            },
+            "goo_marketing": {
+              "type": "object",
+              "description": "Herkunftsnachweise / Certificate of Origin",
+              "required": [
+                "goo_price"
+              ],
+              "properties": {
+                "goo_price": {
+                  "type": "number",
+                  "description": "HKN-Preis / GOO Price"
+                },
+                "goo_compensation_on_curtailment": {
+                  "type": "number",
+                  "description": "HKN-Kompensation Preis bei Abregelung / GOO Compensation Price in case of Curtailment"
+                },
+                "deviating_goo_compensation_below_threshold": {
+                  "type": "object",
+                  "description": "Abweichende HKN-Kompensation unterhalb Schwellwert? / Deviating GOO Compensation Below Threshold?",
+                  "required": [
+                    "reference_index_for_threshold",
+                    "threshold_at_index_prices_below",
+                    "deviating_compensation_amount"
+                  ],
+                  "properties": {
+                    "reference_index_for_threshold": {
+                      "type": "string",
+                      "enum": [
+                        "DELU_EPEX_DA_15min",
+                        "DELU_EPEX_DA_60min"
+                      ],
+                      "description": " / Reference Index for the Threshold"
+                    },
+                    "threshold_at_index_prices_below": {
+                      "type": "number",
+                      "description": "Schwellwert - bei Spotmarktpreisen < [€/MWh] / Threshold at Spot Prices Below"
+                    },
+                    "deviating_compensation_amount": {
+                      "type": "number",
+                      "description": "Abweichende Kompensation Art / Deviating Compensation Type"
+                    }
+                  }
+                }
+              }
+            },
+            "sales_partner_provision": {
+              "type": "object",
+              "description": "Sales Partner Provision / Sales Partner Provision",
+              "required": [
+                "provision_per_month",
+                "provision_volume_dependent",
+                "one_time_provision_absolute",
+                "one_time_provision_percentage"
+              ],
+              "properties": {
+                "provision_per_month": {
+                  "type": "number",
+                  "description": "Provision [€/Monat] / Provision per Month"
+                },
+                "provision_volume_dependent": {
+                  "type": "number",
+                  "description": "Provision volumenabhängig [€/MWh] / Provision Volume Dependent"
+                },
+                "one_time_provision_absolute": {
+                  "type": "number",
+                  "description": "Einmalprovision absolut [€] / One-time Provision Absolute"
+                },
+                "one_time_provision_percentage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Einmalprovision [%] / One-time Provision Percentage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "contract_item": {
+      "type": "object",
+      "required": [
+        "start_date",
+        "marketing_form",
+        "curtailment_energy_calculation_option",
+        "option_regulation",
+        "including_collateral",
+        "remuneration_configuration"
+      ],
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Beginn Vertragsposition / Contract Item Start Date",
+          "$comment": "EVI: C2LiefStart.ContractItem"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Ende Vertragsposition / Contract Item End Date",
+          "$comment": "EVI: C2LiefEnde.ContractItem"
+        },
+        "marketing_form": {
+          "type": "string",
+          "enum": [
+            "subsidized",
+            "non-subsidized"
+          ],
+          "description": "Vermarktungsform / Marketing Form",
+          "$comment": "EVI: C2VERMFORM.ContractItem"
+        },
+        "product": {
+          "type": "string",
+          "description": "Produkt / Product",
+          "$comment": "EVI: C2Produkt.ContractItem"
+        },
+        "curtailment_energy_calculation": {
+          "type": "string",
+          "description": "Ausfallenergieberechnung / Fallback Energy Calculation",
+          "$comment": "EVI: C2ABRMODELL.ContractItem"
+        },
+        "curtailment_energy_calculation_option": {
+          "type": "string",
+          "description": "Wahlrecht Ausfallenergieberechnung / Fallback Energy Calculation Option",
+          "$comment": "EVI: C2WahlrechtAR.ContractItem"
+        },
+        "option_regulation": {
+          "type": "boolean",
+          "description": "Optionsregelung / Option Regulation",
+          "$comment": "EVI: Freeboolean1.ContractItem"
+        },
+        "including_collateral": {
+          "type": "boolean",
+          "description": "inkl. Besicherung / Including Collateral",
+          "$comment": "EVI: C2InklBesich.ContractItem"
+        },
+        "remuneration_configuration": {
+          "$ref": "#/$defs/remuneration_configuration"
+        }
+      }
+    },
+    "market_location": {
+      "type": "object",
+      "required": [
+        "market_location_id",
+        "project_id_grid_operator",
+        "grid_operator",
+        "voltage_level",
+        "metering_device_type",
+        "address"
+      ],
+      "properties": {
+        "market_location_id": {
+          "type": "string",
+          "description": "Marktlokations-ID / Market Location ID",
+          "$comment": "EVI: C2MaLoID.Installation"
+        },
+        "project_id_grid_operator": {
+          "type": "string",
+          "description": "Projekt-ID NB / Project ID Grid Operator",
+          "$comment": "EVI: C2ProjektIDNB.Installation"
+        },
+        "previous_marketing_type": {
+          "type": "string",
+          "description": "Bisherige Vermarktungsart / Previous Marketing Type",
+          "$comment": "EVI: C2BishVMArt.Installation"
+        },
+        "previous_direct_marketer": {
+          "type": "string",
+          "description": "bisheriger Direktvermarkter / Previous Direct Marketer",
+          "$comment": "EVI: C2BishDVKey.Installation"
+        },
+        "grid_operator": {
+          "type": "string",
+          "description": "Anschlussnetzbetreiber / Grid Operator",
+          "$comment": "EVI: C12GRIDOPER.Installation"
+        },
+        "voltage_level": {
+          "type": "string",
+          "description": "Spannungsebene / Voltage Level",
+          "$comment": "EVI: ISU_SpEbene.Installation"
+        },
+        "metering_device_type": {
+          "type": "string",
+          "description": "Messeinrichtungstyp / Metering Device Type",
+          "$comment": "EVI: C2MeDeTypeKey.Installation"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "metering_point": {
+      "type": "object",
+      "required": [
+        "metering_point_id",
+        "maximum_feed_in_capacity",
+        "connection_service_provider"
+      ],
+      "properties": {
+        "metering_point_id": {
+          "type": "string",
+          "description": "ID zur Zuordnung von TRs zum MZP / ID for assigning TRs to Metering Point",
+          "$comment": "Unique identifier for metering point"
+        },
+        "maximum_feed_in_capacity": {
+          "type": "number",
+          "description": "Maximale Einspeiseleistung / Maximum Feed-in Capacity",
+          "$comment": "EVI: MaxEinspLst.C2MESSPUNKT"
+        },
+        "connection_service_provider": {
+          "type": "string",
+          "description": "Anbindungs-Dienstleister / Connection Service Provider",
+          "$comment": "EVI: ANBDL.C2MESSPUNKT"
+        },
+        "switching_stages": {
+          "type": "string",
+          "description": "Schaltstufen / Switching Stages",
+          "$comment": "EVI: c2Schaltstufen.C2MESSPUNKT"
+        }
+      }
+    },
+    "wind_turbine": {
+      "type": "object",
+      "required": [
+        "manufacturer",
+        "turbine_type",
+        "serial_number",
+        "hub_height",
+        "rotor_diameter"
+      ],
+      "properties": {
+        "manufacturer": {
+          "type": "string",
+          "description": "Hersteller / Manufacturer",
+          "$comment": "EVI: C2HerstellerPk.CustomGenerate"
+        },
+        "turbine_type": {
+          "type": "string",
+          "description": "Turbinentyp / Turbine Type",
+          "$comment": "EVI: C2TURBINENTYP.CustomGenerate"
+        },
+        "serial_number": {
+          "type": "string",
+          "description": "Seriennummer / Serial Number",
+          "$comment": "EVI: C2SERIENNR.CustomGenerate"
+        },
+        "hub_height": {
+          "type": "number",
+          "description": "Nabenhöhe / Hub Height",
+          "$comment": "EVI: C2Nabenhoehe.CustomGenerate"
+        },
+        "rotor_diameter": {
+          "type": "number",
+          "description": "Rotor Durchmesser / Rotor Diameter",
+          "$comment": "EVI: C2RotorD.CustomGenerate"
+        },
+        "night_curtailment_from": {
+          "type": "string",
+          "description": "Nachtabregelung Von / Night Curtailment From",
+          "$comment": "EVI: C2NACHTABRVON.CustomGenerate"
+        },
+        "night_curtailment_to": {
+          "type": "string",
+          "description": "Nachtabregelung Bis / Night Curtailment To",
+          "$comment": "EVI: C2NACHTABRBIS.CustomGenerate"
+        },
+        "night_curtailment_max": {
+          "type": "number",
+          "description": "Nachtabregelung Max / Night Curtailment Maximum",
+          "$comment": "EVI: C2NACHTABRMAX.CustomGenerate"
+        },
+        "sector_curtailment_from": {
+          "type": "string",
+          "description": "Sektorabregelung von / Sector Curtailment From",
+          "$comment": "EVI: C2SEKTABRVON.CustomGenerate"
+        },
+        "sector_curtailment_to": {
+          "type": "string",
+          "description": "Sektorabregelung bis / Sector Curtailment To",
+          "$comment": "EVI: C2SEKTABRBIS.CustomGenerate"
+        },
+        "sector_curtailment_max": {
+          "type": "number",
+          "description": "Sektorabregelung Max / Sector Curtailment Maximum",
+          "$comment": "EVI: C2SEKTABRMAX.CustomGenerate"
+        }
+      }
+    },
+    "photovoltaic": {
+      "type": "object",
+      "required": [
+        "tilt_from",
+        "tilt_to",
+        "orientation",
+        "elevation_above_sea_level",
+        "solar_cell_area",
+        "plant_efficiency_pr",
+        "plant_efficiency_ef",
+        "tracking",
+        "bifacial",
+        "module_count",
+        "capacity_per_module",
+        "module_efficiency"
+      ],
+      "properties": {
+        "tilt_from": {
+          "type": "number",
+          "description": "Neigung von / Tilt From",
+          "$comment": "EVI: C2NEIGUNGVON.CustomGenerate"
+        },
+        "tilt_to": {
+          "type": "number",
+          "description": "Neigung bis / Tilt To",
+          "$comment": "EVI: C2NEIGUNGBIS.CustomGenerate"
+        },
+        "orientation": {
+          "type": "string",
+          "description": "Ausrichtung der Anlage / Plant Orientation",
+          "$comment": "EVI: C2Ausrichtung.CustomGenerate"
+        },
+        "elevation_above_sea_level": {
+          "type": "number",
+          "description": "Höhe Anlage über NN / Elevation Above Sea Level",
+          "$comment": "EVI: C2HoeheNN.CustomGenerate"
+        },
+        "solar_cell_area": {
+          "type": "number",
+          "description": "Fläche der Solarzellen / Solar Cell Area",
+          "$comment": "EVI: C2SolarArea.CustomGenerate"
+        },
+        "plant_efficiency_pr": {
+          "type": "number",
+          "description": "Anlagenwirkungsgrad (Performance Ratio) / Plant Efficiency (Performance Ratio)",
+          "$comment": "EVI: C2Wirkungsgrad.CustomGenerate"
+        },
+        "plant_efficiency_ef": {
+          "type": "number",
+          "description": "Anlagenwirkungsgrad (Efficiency Factor) / Plant Efficiency (Efficiency Factor)",
+          "$comment": "EVI: C2EfficiencyFc.CustomGenerate"
+        },
+        "tracking": {
+          "type": "boolean",
+          "description": "nachführbar / Tracking",
+          "$comment": "EVI: C2Nachfuehrbar.CustomGenerate"
+        },
+        "bifacial": {
+          "type": "boolean",
+          "description": "bifacial / Bifacial",
+          "$comment": "EVI: C2Bifacial.CustomGenerate"
+        },
+        "module_count": {
+          "type": "integer",
+          "description": "Anzahl Module / Module Count",
+          "$comment": "EVI: C2AnzModule.CustomGenerate"
+        },
+        "capacity_per_module": {
+          "type": "number",
+          "description": "Leistung je Modul / Capacity per Module",
+          "$comment": "EVI: C2LstgProModul.CustomGenerate"
+        },
+        "module_efficiency": {
+          "type": "number",
+          "description": "Modulwirkungsgrad / Module Efficiency",
+          "$comment": "EVI: C2ModulWirkung.CustomGenerate"
+        }
+      }
+    },
+    "redispatch_technical_resource": {
+      "type": "object",
+      "required": [
+        "supplier",
+        "rd_sr_id",
+        "rd_tr_id"
+      ],
+      "properties": {
+        "eic_code_balancing_compensation": {
+          "type": "string",
+          "description": "EIC Code Bilanzk. für bilanz. Ausgl. RD 2.0 / Planwertmodell / EIC Code Balancing Group for Balancing Compensation RD 2.0 / Scheduled Value Model",
+          "$comment": "EVI: EICCodeBilA.C2RD_CUSTGEN"
+        },
+        "supplier": {
+          "type": "string",
+          "description": "Lieferant / Supplier",
+          "$comment": "EVI: Lieferant.C2RD_CUSTGEN"
+        },
+        "rd_eic_w_code": {
+          "type": "string",
+          "description": "RD EIC-W-Code / RD EIC-W Code",
+          "$comment": "EVI: RDEICW.C2RD_CUSTGEN"
+        },
+        "rd_sr_id": {
+          "type": "string",
+          "description": "RD SR-ID / RD Scheduling Resource ID",
+          "$comment": "EVI: RDSRID.C2RD_CUSTGEN"
+        },
+        "rd_tr_id": {
+          "type": "string",
+          "description": "RD TR-ID / RD Technical Resource ID",
+          "$comment": "EVI: RDTRID.C2RD_CUSTGEN"
+        }
+      }
+    },
+    "technical_resource": {
+      "type": "object",
+      "required": [
+        "technology",
+        "mastr_number",
+        "market_location_id",
+        "metering_point_id",
+        "installed_capacity",
+        "latitude",
+        "longitude",
+        "direct_marketing_required"
+      ],
+      "properties": {
+        "technology": {
+          "type": "string",
+          "enum": [
+            "wind",
+            "photovoltaic"
+          ],
+          "description": "Technologie / Technology",
+          "$comment": "EVI: tbd"
+        },
+        "mastr_number": {
+          "type": "string",
+          "description": "MaStR-Nr. / Master Data Register Number",
+          "$comment": "EVI: C2RDMaStNr.CustomGenerate"
+        },
+        "market_location_id": {
+          "type": "string",
+          "description": "MaLo-ID / ID of the respective Market Location",
+          "$comment": "EVI: C2MaLoID.Installation"
+        },
+        "metering_point_id": {
+          "type": "string",
+          "description": "ID zur Zuordnung von TRs zum MZP / ID for assigning TRs to Metering Point",
+          "$comment": "EVI: Reference to metering_point"
+        },
+        "installed_capacity": {
+          "type": "number",
+          "description": "Installierte Leistung / Installed Capacity",
+          "$comment": "EVI: C2Nennleistung.CustomGenerate"
+        },
+        "eeg_plant_key": {
+          "type": "string",
+          "description": "EEG-Anlagenschlüssel / EEG Plant Key",
+          "$comment": "EVI: C2EEGAnlSchl.CustomGenerate"
+        },
+        "commissioning_date_planned": {
+          "type": "string",
+          "format": "date",
+          "description": "Inbetriebnahmedatum geplant / Commissioning Date Planned",
+          "$comment": "EVI: C2IBNgeplant.CustomGenerate"
+        },
+        "commissioning_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Inbetriebnahmedatum / Commissioning Date",
+          "$comment": "EVI: C2INBETRNAHME.CustomGenerate"
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Dezimalgrad (Lat/N) / Latitude (Decimal Degrees)",
+          "$comment": "EVI: C2LAT.CustomGenerate"
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Dezimalgrad (Lon/E) / Longitude (Decimal Degrees)",
+          "$comment": "EVI: C2LNG.CustomGenerate"
+        },
+        "self_consumption_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Eigenverbrauch (%) / Self-Consumption Percentage",
+          "$comment": "EVI: C2Eingenverbr.CustomGenerate"
+        },
+        "direct_marketing_required": {
+          "type": "string",
+          "enum": [
+            "required",
+            "optional",
+            "not_relevant"
+          ],
+          "description": "Direktvermarktung / Direct Marketing",
+          "$comment": "EVI: C2DirektVerm.CustomGenerate"
+        },
+        "award_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Datum der Bezuschlagung / Award Date",
+          "$comment": "EVI: C2DATBEZUGSCHL.CustomGenerate"
+        },
+        "wind_turbine": {
+          "$ref": "#/$defs/wind_turbine"
+        },
+        "photovoltaic": {
+          "$ref": "#/$defs/photovoltaic"
+        },
+        "redispatch_technical_resource": {
+          "$ref": "#/$defs/redispatch_technical_resource"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "commissioning_date"
+          ],
+          "$comment": "Entweder Inbetriebnahmedatum"
+        },
+        {
+          "required": [
+            "commissioning_date_planned"
+          ],
+          "$comment": "Oder geplantes Inbetriebnahmedatum"
+        }
+      ],
+      "allOf": [
+        {
+          "$comment": "Wenn technology=wind, dann ist wind_turbine erforderlich und photovoltaic nicht erlaubt",
+          "if": {
+            "properties": {
+              "technology": {
+                "const": "wind"
+              }
+            },
+            "required": [
+              "technology"
+            ]
+          },
+          "then": {
+            "required": [
+              "wind_turbine"
+            ],
+            "not": {
+              "required": [
+                "photovoltaic"
+              ]
+            }
+          }
+        },
+        {
+          "$comment": "Wenn technology=photovoltaic, dann ist photovoltaic erforderlich und wind_turbine nicht erlaubt",
+          "if": {
+            "properties": {
+              "technology": {
+                "const": "photovoltaic"
+              }
+            },
+            "required": [
+              "technology"
+            ]
+          },
+          "then": {
+            "required": [
+              "photovoltaic"
+            ],
+            "not": {
+              "required": [
+                "wind_turbine"
+              ]
+            }
+          }
+        },
+        {
+          "$comment": "Wenn commissioning_date gesetzt ist, dann ist redispatch_technical_resource erforderlich",
+          "if": {
+            "required": [
+              "commissioning_date"
+            ]
+          },
+          "then": {
+            "required": [
+              "redispatch_technical_resource"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "contract": {
+      "type": "object",
+      "required": [
+        "contract_number",
+        "contract_start",
+        "contract_end",
+        "contract_type",
+        "extension_clause",
+        "extension_period",
+        "settlement_active",
+        "settlement_emails",
+        "settlement_due_day",
+        "settlement_interval_supplier",
+        "settlement_payment_flow",
+        "settlement_market_premium",
+        "termination_period",
+        "remit_obligation",
+        "remit_mirror_reporting",
+        "signatory_enbw_1",
+        "signatory_enbw_2",
+        "signatory_partner_1",
+        "contract_conclusion_date",
+        "country",
+        "rd_billing_model",
+        "rd_call_procedure",
+        "rd_balancing_model",
+        "rd_operator_btr",
+        "rd_deployment_responsible_eiv"
+      ],
+      "dependentRequired": {
+        "bank_guarantee": [
+          "bank_guarantee_from",
+          "bank_guarantee_amount",
+          "bank_guarantee_until"
+        ]
+      },
+      "properties": {
+        "contract_number": {
+          "type": "string",
+          "description": "Vertrags-Nr. / Contract Number",
+          "$comment": "EVI: ContNo.Contract"
+        },
+        "contract_start": {
+          "type": "string",
+          "format": "date",
+          "description": "Lieferbeginn / Delivery Start",
+          "$comment": "EVI: C2DelivStart.Contract"
+        },
+        "contract_end": {
+          "type": "string",
+          "format": "date",
+          "description": "Lieferende / Delivery End",
+          "$comment": "EVI: ContEndDate.Contract"
+        },
+        "contract_type": {
+          "type": "string",
+          "description": "Vertragstyp / Contract Type",
+          "$comment": "EVI: C2Kundentyp.Contract"
+        },
+        "extension_clause": {
+          "type": "boolean",
+          "description": "Automatische Verlängerungsklausel / Automatic Extension Clause",
+          "$comment": "EVI: C2VerlKlausel.Contract"
+        },
+        "extension_period": {
+          "type": "integer",
+          "description": "Verlängerung um x Monate / Extension Period by x months",
+          "$comment": "EVI: ExtensionPeriod.Contract"
+        },
+        "curtailment_notification": {
+          "type": "string",
+          "description": "Benachrichtigung bei Abregelung / Curtailment Notification",
+          "$comment": "EVI: C2BenachAbreTxt.Contract"
+        },
+        "settlement_active": {
+          "type": "boolean",
+          "description": "Abrechnen / Billing",
+          "$comment": "EVI: C2Abrechnen.Contract"
+        },
+        "settlement_emails": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email"
+          },
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "description": "E-Mail-Adressen für Gutschriften (1-3) / Settlement Email Addresses (1-3)",
+          "$comment": "EVI: C2EmailGutschr.Contract, C2EmailGutschr2.Contract, C2EmailGutschr3.Contract"
+        },
+        "alternative_invoice_address": {
+          "type": "string",
+          "description": "Abweichende Rechnungsadresse / Alternative Invoice Address",
+          "$comment": "EVI: C2AbwRech.Contract"
+        },
+        "settlement_due_day": {
+          "type": "integer",
+          "description": "Kalendertag des Vormonats - Fälligkeitstag / Due Day",
+          "$comment": "EVI: C2FealligTag.Contract"
+        },
+        "settlement_interval_supplier": {
+          "type": "integer",
+          "enum": [
+            1,
+            3,
+            6,
+            12
+          ],
+          "description": "Abrechnungsintervall Lieferant in Monaten / Billing Interval Supplier in Months",
+          "$comment": "EVI: C2AbrIntLief.Contract"
+        },
+        "settlement_payment_flow": {
+          "type": "string",
+          "enum": [
+            "G",
+            "R"
+          ],
+          "description": "Zahlungsfluss / Payment Flow: G=Gutschrift (Credit Note), R=Rechnung (Invoice)",
+          "$comment": "EVI: C2Zahlungsfluss.Contract"
+        },
+        "settlement_order_number": {
+          "type": "string",
+          "description": "Bestellnummer / Order Number",
+          "$comment": "EVI: C2OrderNo.Contract"
+        },
+        "settlement_market_premium": {
+          "type": "boolean",
+          "description": "Abrechnung mit Marktprämie / Billing with Market Premium",
+          "$comment": "EVI: C2AbrechMP.Contract"
+        },
+        "settlement_group": {
+          "type": "string",
+          "description": "Abrechnungsgruppe / Billing Group",
+          "$comment": "EVI: C2AbrGrpPk.Contract"
+        },
+        "bank_account_iban": {
+          "type": "string",
+          "pattern": "tbd",
+          "description": "IBAN / IBAN",
+          "$comment": "EVI: IBAN.BankAccount"
+        },
+        "bank_account_holder": {
+          "type": "string",
+          "description": "Kontoinhaber / Account Holder",
+          "$comment": "EVI: AccOwner.BankAccount"
+        },
+        "bank_account_bic": {
+          "type": "string",
+          "pattern": "tbd",
+          "description": "BIC / BIC",
+          "$comment": "EVI: BICKey.BankAccount"
+        },
+        "termination_period": {
+          "type": "integer",
+          "description": "Kündigungsfrist in Monaten / Termination Period in months",
+          "$comment": "EVI: TerminationPeriod.Contract"
+        },
+        "remit_obligation": {
+          "type": "string",
+          "description": "REMIT-Pflicht / REMIT Obligation",
+          "$comment": "EVI: C2REMITPflicht.Contract"
+        },
+        "remit_mirror_reporting": {
+          "type": "string",
+          "description": "REMIT-Spiegelmeldung / REMIT Mirror Reporting",
+          "$comment": "EVI: C2REMITSpiegel.Contract"
+        },
+        "bank_guarantee": {
+          "type": "string",
+          "enum": [
+            "rating-dependent",
+            "general"
+          ],
+          "description": "Bankbürgschaft / Bank Guarantee",
+          "$comment": "EVI: C2Bankbuerg.Contract"
+        },
+        "bank_guarantee_from": {
+          "type": "string",
+          "format": "date",
+          "description": "Bankbürgschaft von / Bank Guarantee From",
+          "$comment": "EVI: C2BBurgVon.Contract"
+        },
+        "bank_guarantee_amount": {
+          "type": "number",
+          "description": "Höhe der Bankbürgschaft / Bank Guarantee Amount",
+          "$comment": "EVI: C2Besicherung.Contract"
+        },
+        "bank_guarantee_until": {
+          "type": "string",
+          "format": "date",
+          "description": "Bankbürgschaft bis / Bank Guarantee Until",
+          "$comment": "EVI: C2BBuergBis.Contract"
+        },
+        "signatory_enbw_1": {
+          "type": "string",
+          "description": "Unterzeichner 1 EnBW / Signatory 1 EnBW",
+          "$comment": "EVI: C2UntEnBW1.Contract"
+        },
+        "signatory_enbw_2": {
+          "type": "string",
+          "description": "Unterzeichner 2 EnBW / Signatory 2 EnBW",
+          "$comment": "EVI: C2UntEnBW2.Contract"
+        },
+        "signatory_partner_1": {
+          "type": "string",
+          "description": "Unterzeichner 1 Vertragspartner / Signatory 1 Contract Partner",
+          "$comment": "EVI: C2UntVP1.Contract"
+        },
+        "signatory_partner_2": {
+          "type": "string",
+          "description": "Unterzeichner 2 Vertragspartner / Signatory 2 Contract Partner",
+          "$comment": "EVI: C2UntVPAP2.Contract"
+        },
+        "signature_customer_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Unterzeichnung Geschäftspartner / Customer Signature Date",
+          "$comment": "EVI: SignatureCust.Contract"
+        },
+        "contract_conclusion_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Vertragsabschluss / Contract Conclusion Date",
+          "$comment": "EVI: ContStartDate.Contract"
+        },
+        "country": {
+          "type": "string",
+          "description": "Land / Country",
+          "$comment": "EVI: C2Country.Contract"
+        },
+        "rd_billing_model": {
+          "type": "string",
+          "description": "RD Abrechnungsmodell / RD Billing Model",
+          "$comment": "EVI: RDAbrModell.C2RD_CONTRACT"
+        },
+        "rd_call_procedure": {
+          "type": "string",
+          "description": "RD Abrufverfahren / RD Call Procedure",
+          "$comment": "EVI: RDAbrufVerf.C2RD_CONTRACT"
+        },
+        "rd_balancing_model": {
+          "type": "string",
+          "description": "RD Bilanzierungsmodell / RD Balancing Model",
+          "$comment": "EVI: RDBilModell.C2RD_CONTRACT"
+        },
+        "rd_operator_btr": {
+          "type": "string",
+          "description": "RD Betreiber BTR / RD Operator BTR",
+          "$comment": "EVI: RDBetrBTRRef.C2RD_CONTRACT"
+        },
+        "rd_deployment_responsible_eiv": {
+          "type": "string",
+          "description": "RD Einsatzverantwortlicher EIV / RD Deployment Responsible EIV",
+          "$comment": "EVI: RDEvEIVRef.C2RD_CONTRACT"
+        },
+        "rd_email_address": {
+          "type": "string",
+          "description": "Email-Adresse für Redispatch / Email Address for Redispatch ",
+          "$comment": "EVI: RDMail.C2RD_CONTRACT"
+        }
+      }
+    },
+    "counterparty": {
+      "type": "object",
+      "required": [
+        "company_name",
+        "person_type",
+        "language",
+        "acer_code",
+        "trade_register_number",
+        "trade_register_court"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "vat_id"
+          ]
+        },
+        {
+          "required": [
+            "tax_number"
+          ]
+        }
+      ],
+      "properties": {
+        "company_name": {
+          "type": "string",
+          "description": "Firma / Company Name",
+          "$comment": "EVI: Name1.Customer"
+        },
+        "person_type": {
+          "type": "string",
+          "description": "Typ / Person Type",
+          "$comment": "EVI: PersontypeKey.Customer"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "DE",
+            "EN",
+            "FR"
+          ],
+          "description": "Sprache / Language",
+          "$comment": "EVI: LanguageKey.Person"
+        },
+        "acer_code": {
+          "type": "string",
+          "description": "ACER-Code / ACER Code",
+          "$comment": "EVI: C2ACER.Customer"
+        },
+        "reverse_charge": {
+          "type": "string",
+          "description": "Reverse Charge / Reverse Charge",
+          "$comment": "EVI: C2ReversCharge.Customer"
+        },
+        "ar_partner_type": {
+          "type": "string",
+          "enum": [
+            "CONSUMER",
+            "VERB_ORG",
+            "VERB_RC",
+            "VERB_UST",
+            "WV_RC"
+          ],
+          "description": "AR GP Typ / AR Partner Type",
+          "$comment": "EVI: C12ISU_TYPE.Customer"
+        },
+        "lei": {
+          "type": "string",
+          "description": "Reale LEI / Legal Entity Identifier",
+          "$comment": "EVI: C2LEI.Customer"
+        },
+        "vat_id": {
+          "type": "string",
+          "description": "Umsatzsteuer-ID / W-IN / VAT ID",
+          "$comment": "EVI: VATIDNo.Person"
+        },
+        "tax_number": {
+          "type": "string",
+          "description": "Steuer-Nr. / Tax Number",
+          "$comment": "EVI: Wagetaxno.Person"
+        },
+        "trade_register_number": {
+          "type": "string",
+          "description": "Handelsregister Nr. / Trade Register Number",
+          "$comment": "EVI: TradeRegister.Person"
+        },
+        "trade_register_court": {
+          "type": "string",
+          "description": "Registergericht / Trade Register Court",
+          "$comment": "EVI: TradeRegisterCity.Person"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "communication": {
+          "$ref": "#/$defs/communication"
+        }
+      }
+    },
+    "contact_persons": {
+      "type": "array",
+      "description": "Weitere Ansprechpartner des Kunden / Further contact persons of the customer",
+      "items": {
+        "type": "object",
+        "required": [
+          "last_name",
+          "language",
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "C",
+              "M",
+              "F",
+              "D"
+            ],
+            "description": "Typ / Type",
+            "$comment": "EVI: Sex.ContactPerson"
+          },
+          "language": {
+            "type": "string",
+            "description": "Sprache / Language",
+            "$comment": "EVI: LanguageKey.ContactPerson"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Nachname/Firma / Last Name/Company",
+            "$comment": "EVI: LastName.ContactPerson"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "Vorname/Zusatz1 / First Name/Addition 1",
+            "$comment": "EVI: FirstName.ContactPerson"
+          },
+          "name_addition": {
+            "type": "string",
+            "description": "Zusatz/Zusatz2 / Addition/Addition 2",
+            "$comment": "EVI: Name3.ContactPerson"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "E-Mail / Email",
+            "$comment": "EVI: Email.ContactPerson"
+          },
+          "phone_country_code": {
+            "type": "string",
+            "description": "Telefon Ländervorwahl / Phone Country Code",
+            "$comment": "EVI: PhoneNoCountry.ContactPerson"
+          },
+          "phone_area_code": {
+            "type": "string",
+            "description": "Telefon Ortsvorwahl / Phone Area Code",
+            "$comment": "EVI: PhoneNoCity.ContactPerson"
+          },
+          "phone_base_number": {
+            "type": "string",
+            "description": "Telefon Rufnummer / Phone Base Number",
+            "$comment": "EVI: PhoneNoBase.ContactPerson"
+          },
+          "phone_extension": {
+            "type": "string",
+            "description": "Telefon Durchwahl / Phone Extension",
+            "$comment": "EVI: PhoneNoExtension.ContactPerson"
+          },
+          "contract_role": {
+            "type": "string",
+            "enum": [
+              "commercial_operator",
+              "portfolio_manager",
+              "technical_operator",
+              "contract_partner"
+            ],
+            "$comment": "Optionale Vertragsrollen für Zugriff auf den Vertrag im ITC-Portal"
+          }
+        }
+      },
+      "minItems": 0,
+      "$comment": "Optional contact persons for the counterparty"
+    }
+  }
+}

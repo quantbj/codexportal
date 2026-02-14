@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Angebot | Direktvermarktung Sales Portal</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="offer-page">
+  <header class="hero hero-compact">
+    <div class="hero-content">
+      <p class="kicker">Direktvermarktung Strom</p>
+      <h1>Unverbindliches Angebot anfordern</h1>
+      <p>In wenigen Schritten zu Ihrem individuellen Direktvermarktungsangebot.</p>
+      <nav class="top-nav" aria-label="Seitennavigation">
+        <a class="nav-link" href="./index.html">Pricing</a>
+        <a class="nav-link active" href="./offer.html">Angebot</a>
+        <a class="nav-link" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link" href="./agb.html">AGB</a>
+        <a class="nav-link" href="./impressum.html">Impressum</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout offer-layout">
+    <aside class="offer-sidebar">
+      <section class="panel">
+        <p class="sidebar-title">Benutzerkonto</p>
+        <form id="authForm" class="form-grid">
+          <label>
+            Benutzername
+            <input name="username" type="text" placeholder="customer1" required>
+          </label>
+          <label>
+            Passwort
+            <input name="password" type="password" placeholder="customer1" required>
+          </label>
+          <div class="form-actions">
+            <button type="submit">Anmelden</button>
+            <button id="loadDraftsButton" type="button">Anfragen laden</button>
+          </div>
+        </form>
+        <p id="authStatus" class="contract-status">Nicht angemeldet.</p>
+        <div id="draftsList" class="drafts-list"></div>
+      </section>
+
+      <section class="panel">
+        <p class="sidebar-title">Ablauf</p>
+        <ol class="process-list">
+          <li><strong>Erzeugungsdaten</strong><span>Basisinformationen zur Anlage eingeben.</span></li>
+          <li><strong>Kontaktdaten</strong><span>Ansprechpartner für das Vertragsangebot angeben.</span></li>
+          <li><strong>Anfrage absenden</strong><span>Wir prüfen und senden Ihr individuelles Angebot.</span></li>
+        </ol>
+      </section>
+
+      <section class="panel steps">
+        <h2>Nach Ihrer Anfrage</h2>
+        <ol>
+          <li>Sie erhalten ein Vertragsangebot.</li>
+          <li>Digitale Unterschrift und Anlage der Stammdaten.</li>
+          <li>Portalzugang und monatliche Erlösabrechnung.</li>
+        </ol>
+      </section>
+    </aside>
+
+    <section class="offer-content">
+      <section class="panel form-card">
+        <h2>Anlagedaten</h2>
+        <p class="section-intro">Werte aus der letzten Preisberechnung sind bereits vorbelegt.</p>
+        <form id="quoteForm" class="form-grid">
+          <label>
+            Jahreserzeugung (MWh)
+            <input name="annualGenerationMWh" type="number" min="1" required>
+          </label>
+          <label>
+            Leistung (kWp)
+            <input name="installedCapacityKWp" type="number" min="1" required>
+          </label>
+          <label>
+            Marktprämie (EUR/MWh)
+            <input name="marketPremiumEurPerMWh" type="number" required>
+          </label>
+          <label>
+            Profil
+            <select name="profileType">
+              <option value="mixed">Mixed</option>
+              <option value="baseLoad">Base Load</option>
+              <option value="peakLoad">Peak Load</option>
+            </select>
+          </label>
+          <label class="full-width">
+            Standort
+            <input name="location" type="text" required>
+          </label>
+
+          <label>
+            Unternehmen
+            <input name="companyName" type="text" required>
+          </label>
+          <label>
+            Ansprechpartner
+            <input name="contactName" type="text" required>
+          </label>
+          <label class="full-width">
+            E-Mail
+            <input name="email" type="email" required>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit">Angebot anfordern</button>
+            <button id="saveDraftButton" type="button">Entwurf speichern</button>
+            <a class="button-link secondary" href="./index.html">Zurück zur Preisberechnung</a>
+          </div>
+        </form>
+        <p id="quoteResult" class="result"></p>
+      </section>
+
+      <section class="panel form-card">
+        <h2>Weitere Vertragsparameter</h2>
+        <p class="section-intro">Felder werden aus <code>contract-offer.json</code> erzeugt.</p>
+        <p id="contractSchemaStatus" class="contract-status">Lade Vertragsschema ...</p>
+        <div id="contractSchemaForm"></div>
+        <pre id="contractJsonPreview" class="contract-preview">{}</pre>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./offer.js"></script>
+</body>
+</html>

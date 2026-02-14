@@ -1,0 +1,12 @@
+[
+  {
+    "id": "afa73e5b-3fd2-4888-8abf-827d5fc5fa70",
+    "ownerUserId": "u-customer-1",
+    "schemaVersion": "v2",
+    "payload": {
+      "hello": "updated"
+    },
+    "createdAt": "2026-02-14T10:54:07.959Z",
+    "updatedAt": "2026-02-14T10:54:07.960Z"
+  }
+]

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" role="img" aria-label="Solar park with wind turbine">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d2f85"/>
+      <stop offset="100%" stop-color="#345cc8"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a8f6e"/>
+      <stop offset="100%" stop-color="#0f6f58"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="480" fill="url(#sky)"/>
+  <circle cx="1030" cy="90" r="44" fill="#fd951f"/>
+
+  <path d="M0 340 C190 300, 330 330, 480 300 C650 262, 890 340, 1200 285 L1200 480 L0 480 Z" fill="url(#ground)"/>
+
+  <g transform="translate(150 265)">
+    <polygon points="0,70 165,42 188,99 20,129" fill="#0a1d57"/>
+    <line x1="25" y1="122" x2="3" y2="66" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="65" y1="111" x2="45" y2="55" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="105" y1="100" x2="85" y2="45" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="145" y1="90" x2="125" y2="36" stroke="#5f8cff" stroke-width="2"/>
+  </g>
+
+  <g transform="translate(430 258)">
+    <polygon points="0,70 165,42 188,99 20,129" fill="#0a1d57"/>
+    <line x1="25" y1="122" x2="3" y2="66" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="65" y1="111" x2="45" y2="55" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="105" y1="100" x2="85" y2="45" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="145" y1="90" x2="125" y2="36" stroke="#5f8cff" stroke-width="2"/>
+  </g>
+
+  <g transform="translate(710 251)">
+    <polygon points="0,70 165,42 188,99 20,129" fill="#0a1d57"/>
+    <line x1="25" y1="122" x2="3" y2="66" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="65" y1="111" x2="45" y2="55" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="105" y1="100" x2="85" y2="45" stroke="#5f8cff" stroke-width="2"/>
+    <line x1="145" y1="90" x2="125" y2="36" stroke="#5f8cff" stroke-width="2"/>
+  </g>
+
+  <g transform="translate(965 220)">
+    <rect x="-4" y="70" width="8" height="170" fill="#f7fbff"/>
+    <circle cx="0" cy="66" r="8" fill="#f7fbff"/>
+    <polygon points="0,66 -95,36 -6,56" fill="#f7fbff"/>
+    <polygon points="0,66 40,-20 6,58" fill="#f7fbff"/>
+    <polygon points="0,66 54,142 2,72" fill="#f7fbff"/>
+  </g>
+</svg>

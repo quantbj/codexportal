@@ -1,0 +1,12 @@
+{
+  "name": "@sales-portal/pricing-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "test:coverage": "bash ../../scripts/coverage-check.sh",
+    "lint": "node --check src/index.js && node --check src/router.js && node --check src/PricingEngine.js && node --check src/PricingModelRepository.js"
+  }
+}

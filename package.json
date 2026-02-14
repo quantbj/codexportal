@@ -1,0 +1,26 @@
+{
+  "name": "sales-portal-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Sales portal for pricing and closing direct marketing contracts",
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend",
+    "apps/pricing-service",
+    "apps/contracts-service"
+  ],
+  "scripts": {
+    "start": "npm run start -w apps/backend",
+    "start:backend": "npm run start -w apps/backend",
+    "start:frontend": "npm run start -w apps/frontend",
+    "start:pricing-service": "npm run start -w apps/pricing-service",
+    "start:contracts-service": "npm run start -w apps/contracts-service",
+    "test": "npm run test -w apps/backend && npm run test -w apps/frontend && npm run test -w apps/pricing-service && npm run test -w apps/contracts-service",
+    "test:coverage": "npm run test:coverage -w apps/backend && npm run test:coverage -w apps/frontend && npm run test:coverage -w apps/pricing-service && npm run test:coverage -w apps/contracts-service",
+    "lint": "npm run lint -w apps/backend && npm run lint -w apps/frontend && npm run lint -w apps/pricing-service && npm run lint -w apps/contracts-service",
+    "ci": "npm run lint && npm run test:coverage"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

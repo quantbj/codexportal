@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: Sales Portal API
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: API healthy
+  /api/pricing/calculate:
+    post:
+      summary: Calculate annual pricing projection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pricingModelId, annualGenerationMWh, installedCapacityKWp, profileType, marketPremiumEurPerMWh]
+              properties:
+                pricingModelId:
+                  type: string
+                annualGenerationMWh:
+                  type: number
+                installedCapacityKWp:
+                  type: number
+                profileType:
+                  type: string
+                  enum: [baseLoad, peakLoad, mixed]
+                marketPremiumEurPerMWh:
+                  type: number
+      responses:
+        '200':
+          description: Calculation created
+        '400':
+          description: Validation error
+  /api/quotes/request:
+    post:
+      summary: Create quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Quote created
+        '400':
+          description: Validation error
+  /api/quotes/{quoteId}:
+    get:
+      summary: Retrieve quote by id
+      parameters:
+        - name: quoteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quote details
+        '404':
+          description: Quote not found

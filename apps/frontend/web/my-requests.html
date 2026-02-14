@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meine Anfragen | Direktvermarktung Sales Portal</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="offer-page">
+  <header class="hero hero-compact">
+    <div class="hero-content">
+      <p class="kicker">Direktvermarktung Strom</p>
+      <h1>Meine Anfragen</h1>
+      <p>Übersicht und Wiederaufnahme gespeicherter Preis- und Angebotsentwürfe.</p>
+      <nav class="top-nav" aria-label="Seitennavigation">
+        <a class="nav-link" href="./index.html">Pricing</a>
+        <a class="nav-link" href="./offer.html">Angebot</a>
+        <a class="nav-link active" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link" href="./agb.html">AGB</a>
+        <a class="nav-link" href="./impressum.html">Impressum</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel form-card">
+      <h2>Anmeldung</h2>
+      <form id="authForm" class="form-grid">
+        <label>
+          Benutzername
+          <input name="username" type="text" placeholder="customer1" required>
+        </label>
+        <label>
+          Passwort
+          <input name="password" type="password" placeholder="customer1" required>
+        </label>
+        <div class="form-actions">
+          <button type="submit">Anmelden</button>
+          <button id="loadDraftsButton" type="button">Anfragen laden</button>
+        </div>
+      </form>
+      <p id="authStatus" class="contract-status">Nicht angemeldet.</p>
+    </section>
+
+    <section class="panel form-card">
+      <h2>Gespeicherte Anfragen</h2>
+      <div id="draftsList" class="drafts-list"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./my-requests.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "@sales-portal/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "test:coverage": "bash ../../scripts/coverage-check.sh",
+    "lint": "node --check server.js && node --check web/formatters.js && node --check web/pricing.js && node --check web/offer.js && node --check web/contract-form.js && node --check web/my-requests.js"
+  }
+}

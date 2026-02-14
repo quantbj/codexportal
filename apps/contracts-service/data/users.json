@@ -1,0 +1,20 @@
+[
+  {
+    "id": "u-customer-1",
+    "username": "customer1",
+    "password": "customer1",
+    "role": "customer"
+  },
+  {
+    "id": "u-customer-2",
+    "username": "customer2",
+    "password": "customer2",
+    "role": "customer"
+  },
+  {
+    "id": "u-super-1",
+    "username": "admin",
+    "password": "admin",
+    "role": "superuser"
+  }
+]
