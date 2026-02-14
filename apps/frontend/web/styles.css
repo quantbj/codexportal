@@ -27,7 +27,7 @@ body {
 }
 
 .hero-content {
-  max-width: 980px;
+  max-width: 1120px;
   margin: 0 auto;
 }
 
@@ -106,8 +106,8 @@ h1 {
 }
 
 .layout {
-  max-width: 980px;
-  margin: -2rem auto 2rem;
+  max-width: 1120px;
+  margin: -0.75rem auto 2rem;
   padding: 0 1rem;
   display: grid;
   gap: 1rem;
@@ -126,24 +126,15 @@ h1 {
 }
 
 .offer-layout {
-  grid-template-columns: minmax(260px, 320px) 1fr;
+  grid-template-columns: 1fr minmax(360px, 430px);
   align-items: start;
 }
 
-.pricing-page .hero-content,
-.pricing-page .layout {
-  max-width: 1120px;
-}
-
-.pricing-layout {
-  grid-template-columns: 1fr minmax(360px, 430px);
-}
-
-.pricing-layout .offer-content {
+.offer-layout .offer-content {
   order: 1;
 }
 
-.pricing-layout .offer-sidebar {
+.offer-layout .offer-sidebar {
   order: 2;
 }
 
@@ -484,8 +475,8 @@ button:hover {
     grid-template-columns: 1fr;
   }
 
-  .pricing-layout .offer-content,
-  .pricing-layout .offer-sidebar {
+  .offer-layout .offer-content,
+  .offer-layout .offer-sidebar {
     order: initial;
   }
 
@@ -494,6 +485,6 @@ button:hover {
   }
 
   .layout {
-    margin-top: -1rem;
+    margin-top: 0.25rem;
   }
 }
