@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meine Anfragen | Direktvermarktung Sales Portal</title>
+  <title>Gebuchte Verträge | Direktvermarktung Sales Portal</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body class="offer-page">
   <header class="hero hero-compact">
     <div class="hero-content">
       <p class="kicker">Direktvermarktung Strom</p>
-      <h1>Meine Anfragen</h1>
-      <p>Übersicht und Wiederaufnahme gespeicherter Preis- und Angebotsentwürfe.</p>
+      <h1>Gebuchte Verträge</h1>
+      <p>Übersicht Ihrer gespeicherten Entwürfe und gebuchten Verträge.</p>
       <nav class="top-nav" aria-label="Seitennavigation">
         <a class="nav-link" href="./index.html">Pricing</a>
-        <a class="nav-link" href="./offer.html">Angebot</a>
-        <a class="nav-link active" href="./my-requests.html">Meine Anfragen</a>
+        <a class="nav-link" href="./offer.html">Vertrag buchen</a>
+        <a class="nav-link active" href="./my-requests.html">Gebuchte Verträge</a>
         <a class="nav-link admin-nav-link nav-hidden" href="./admin.html">Admin</a>
         <a class="nav-link" href="./agb.html">AGB</a>
         <a class="nav-link" href="./impressum.html">Impressum</a>
@@ -37,7 +37,7 @@
         </label>
         <div class="form-actions">
           <button type="submit">Anmelden</button>
-          <button id="loadDraftsButton" type="button">Anfragen laden</button>
+          <button id="loadDraftsButton" type="button">Verträge laden</button>
           <button id="logoutButton" type="button">Abmelden</button>
         </div>
       </form>
@@ -45,8 +45,10 @@
     </section>
 
     <section class="panel form-card">
-      <h2>Gespeicherte Anfragen</h2>
+      <h2>Draft</h2>
       <div id="draftsList" class="drafts-list"></div>
+      <h2 class="contracts-subsection">Booked</h2>
+      <div id="bookedList" class="drafts-list"></div>
     </section>
   </main>
 

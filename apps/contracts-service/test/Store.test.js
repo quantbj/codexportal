@@ -27,6 +27,7 @@ test("Store initializes default users and supports role-filtered draft access", 
   });
 
   assert.ok(created.id);
+  assert.equal(created.status, "draft");
   assert.equal(store.listDraftsForUser(customer).length, 1);
   assert.equal(store.listDraftsForUser(superuser).length, 1);
 
@@ -34,10 +35,12 @@ test("Store initializes default users and supports role-filtered draft access", 
     id: created.id,
     ownerUserId: customer.id,
     schemaVersion: "v2",
+    status: "booked",
     payload: { hello: "updated" }
   });
 
   assert.equal(updated.schemaVersion, "v2");
+  assert.equal(updated.status, "booked");
   assert.equal(updated.payload.hello, "updated");
   assert.equal(store.getDraftById(created.id).payload.hello, "updated");
   assert.equal(store.deleteDraftById(created.id), true);

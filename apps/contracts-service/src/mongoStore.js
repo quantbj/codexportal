@@ -91,10 +91,11 @@ export class MongoStore {
     return result || null;
   }
 
-  async saveDraft({ id, ownerUserId, schemaVersion, payload }) {
+  async saveDraft({ id, ownerUserId, schemaVersion, status, payload }) {
     const now = new Date().toISOString();
     const draftId = id || randomUUID();
     const nextSchemaVersion = schemaVersion || "v1";
+    const nextStatus = normalizeDraftStatus(status);
 
     await this.drafts.updateOne(
       { id: draftId },
@@ -102,6 +103,7 @@ export class MongoStore {
         $set: {
           ownerUserId,
           schemaVersion: nextSchemaVersion,
+          status: nextStatus,
           payload,
           updatedAt: now
         },
@@ -118,11 +120,13 @@ export class MongoStore {
 
   async listDraftsForUser(user) {
     const query = user.role === "superuser" ? {} : { ownerUserId: user.id };
-    return this.drafts.find(query).sort({ updatedAt: -1 }).toArray();
+    const drafts = await this.drafts.find(query).sort({ updatedAt: -1 }).toArray();
+    return drafts.map((draft) => withNormalizedStatus(draft));
   }
 
   async getDraftById(id) {
-    return this.drafts.findOne({ id });
+    const draft = await this.drafts.findOne({ id });
+    return draft ? withNormalizedStatus(draft) : null;
   }
 
   async deleteDraftById(id) {
@@ -164,4 +168,15 @@ function validateUserInput({ username, password, role }) {
   if (!["customer", "superuser"].includes(role)) {
     throw new Error("Invalid role");
   }
+}
+
+function normalizeDraftStatus(status) {
+  return status === "booked" ? "booked" : "draft";
+}
+
+function withNormalizedStatus(draft) {
+  return {
+    ...draft,
+    status: normalizeDraftStatus(draft?.status)
+  };
 }

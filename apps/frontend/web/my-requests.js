@@ -8,6 +8,7 @@ const authStatus = document.getElementById("authStatus");
 const loadDraftsButton = document.getElementById("loadDraftsButton");
 const logoutButton = document.getElementById("logoutButton");
 const draftsList = document.getElementById("draftsList");
+const bookedList = document.getElementById("bookedList");
 
 await syncAdminNavVisibility();
 restoreAuthStatus();
@@ -66,7 +67,7 @@ async function loadDrafts() {
   });
 
   if (!response.ok) {
-    throw new Error(await toGermanApiError(response, "Anfragen konnten nicht geladen werden"));
+    throw new Error(await toGermanApiError(response, "Verträge konnten nicht geladen werden"));
   }
 
   const drafts = await response.json();
@@ -91,23 +92,63 @@ async function logoutFromContractsService() {
 
 function renderDrafts(drafts) {
   draftsList.innerHTML = "";
+  bookedList.innerHTML = "";
 
   if (!Array.isArray(drafts) || drafts.length === 0) {
-    draftsList.textContent = "Keine gespeicherten Anfragen.";
+    draftsList.textContent = "Keine Draft-Verträge.";
+    bookedList.textContent = "Keine Booked-Verträge.";
     return;
   }
 
-  for (const draft of drafts) {
-    const item = document.createElement("div");
-    item.className = "draft-item";
+  // Legacy records without an explicit status are treated as drafts.
+  const draftContracts = drafts.filter((entry) => normalizeContractStatus(entry.status) === "draft");
+  const bookedContracts = drafts.filter((entry) => normalizeContractStatus(entry.status) === "booked");
+  draftsList.appendChild(buildContractsTable(draftContracts, "Keine Draft-Verträge."));
+  bookedList.appendChild(buildContractsTable(bookedContracts, "Keine Booked-Verträge."));
+}
 
-    const details = document.createElement("div");
-    details.textContent = `${draft.id} | Besitzer: ${draft.ownerUserId} | Update: ${draft.updatedAt || "-"}`;
+function buildContractsTable(contracts, emptyMessage) {
+  if (!contracts.length) {
+    const empty = document.createElement("div");
+    empty.className = "draft-item";
+    empty.textContent = emptyMessage;
+    return empty;
+  }
+
+  const table = document.createElement("table");
+  table.className = "contracts-table";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Besitzer</th>
+        <th>Update</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+  for (const contract of contracts) {
+    const row = document.createElement("tr");
+
+    const idCell = document.createElement("td");
+    idCell.textContent = contract.id || "-";
+
+    const ownerCell = document.createElement("td");
+    ownerCell.textContent = contract.ownerUserId || "-";
+
+    const updatedCell = document.createElement("td");
+    updatedCell.textContent = formatDate(contract.updatedAt);
+
+    const actionsCell = document.createElement("td");
+    actionsCell.className = "contracts-actions-cell";
 
     const resume = document.createElement("a");
     resume.className = "button-link secondary";
-    resume.href = `./offer.html?draftId=${encodeURIComponent(draft.id)}`;
-    resume.textContent = "Weiter bearbeiten";
+    resume.href = `./offer.html?draftId=${encodeURIComponent(contract.id)}`;
+    resume.textContent = "Öffnen";
 
     const remove = document.createElement("button");
     remove.type = "button";
@@ -115,22 +156,23 @@ function renderDrafts(drafts) {
     remove.textContent = "Löschen";
     remove.addEventListener("click", async () => {
       try {
-        await deleteDraft(draft.id);
+        await deleteDraft(contract.id);
         await loadDrafts();
       } catch (error) {
         authStatus.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
       }
     });
 
-    const actions = document.createElement("div");
-    actions.className = "draft-actions";
-    actions.appendChild(resume);
-    actions.appendChild(remove);
-
-    item.appendChild(details);
-    item.appendChild(actions);
-    draftsList.appendChild(item);
+    actionsCell.appendChild(resume);
+    actionsCell.appendChild(remove);
+    row.appendChild(idCell);
+    row.appendChild(ownerCell);
+    row.appendChild(updatedCell);
+    row.appendChild(actionsCell);
+    tbody.appendChild(row);
   }
+
+  return table;
 }
 
 async function deleteDraft(draftId) {
@@ -145,15 +187,27 @@ async function deleteDraft(draftId) {
   });
 
   if (!response.ok) {
-    throw new Error(await toGermanApiError(response, "Anfrage konnte nicht gelöscht werden"));
+    throw new Error(await toGermanApiError(response, "Vertrag konnte nicht gelöscht werden"));
   }
 }
 
 function restoreAuthStatus() {
   if (localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)) {
-    authStatus.textContent = "Token vorhanden. Anfragen können geladen werden.";
+    authStatus.textContent = "Token vorhanden. Verträge können geladen werden.";
     loadDrafts().catch(() => {
       authStatus.textContent = "Token vorhanden, Laden fehlgeschlagen. Bitte neu anmelden.";
     });
   }
+}
+
+function normalizeContractStatus(status) {
+  return status === "booked" ? "booked" : "draft";
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "-";
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString("de-DE");
 }

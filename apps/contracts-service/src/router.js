@@ -91,6 +91,7 @@ export function createRouter(dependencies = {}) {
           id: payload.id,
           ownerUserId: user.id,
           schemaVersion: payload.schemaVersion,
+          status: payload.status,
           payload: payload.payload
         });
 

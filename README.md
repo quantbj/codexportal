@@ -66,6 +66,12 @@ Optional MongoDB env vars:
 - `AUTH_RATE_LIMIT_WINDOW_MS` (default `300000`, five minutes)
 - `AUTH_RATE_LIMIT_MAX_ATTEMPTS` (default `10`)
 
+Draft records persisted by `contracts-service` now include a `status`:
+- `draft`: saved via `Entwurf speichern`
+- `booked`: saved via `Vertrag buchen`
+
+The frontend page `my-requests.html` is presented as `Gebuchte Verträge` and splits entries into separate `Draft` and `Booked` tables.
+
 ## Demo Users (contracts-service)
 
 - `customer1` / `customer1` -> role `customer`

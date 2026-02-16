@@ -69,11 +69,13 @@ function createMemoryStore({ ready = true, throwOnReady = false } = {}) {
       user.password = password;
       return user;
     },
-    saveDraft({ id, ownerUserId, schemaVersion, payload }) {
+    saveDraft({ id, ownerUserId, schemaVersion, status, payload }) {
+      const nextStatus = status === "booked" ? "booked" : "draft";
       if (id) {
         const existing = drafts.find((draft) => draft.id === id);
         if (existing) {
           existing.payload = payload;
+          existing.status = nextStatus;
           return existing;
         }
       }
@@ -82,6 +84,7 @@ function createMemoryStore({ ready = true, throwOnReady = false } = {}) {
         id: `d-${drafts.length + 1}`,
         ownerUserId,
         schemaVersion: schemaVersion || "v1",
+        status: nextStatus,
         payload
       };
       drafts.push(created);
@@ -157,6 +160,7 @@ test("contracts-service authenticates, stores drafts and enforces role access", 
     payload: { payload: { contractParameters: { pricing: { foo: 1 } } } }
   });
   assert.equal(saveDraft.statusCode, 201);
+  assert.equal(saveDraft.body.status, "draft");
   const draftId = saveDraft.body.id;
 
   const loginOther = await invokeRoute(router, {
@@ -270,6 +274,16 @@ test("contracts-service supports me endpoint, draft update, and not-found handli
   });
   assert.equal(updated.statusCode, 201);
   assert.equal(updated.body.payload.v, 2);
+  assert.equal(updated.body.status, "draft");
+
+  const booked = await invokeRoute(router, {
+    method: "POST",
+    url: "/drafts",
+    authorization: `Bearer ${token}`,
+    payload: { id: created.body.id, status: "booked", payload: { v: 3 } }
+  });
+  assert.equal(booked.statusCode, 201);
+  assert.equal(booked.body.status, "booked");
 
   const getOwnDraft = await invokeRoute(router, {
     method: "GET",

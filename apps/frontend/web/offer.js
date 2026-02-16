@@ -19,6 +19,8 @@ const saveDraftButton = document.getElementById("saveDraftButton");
 const draftsList = document.getElementById("draftsList");
 const offerFormSection = document.getElementById("offerFormSection");
 let getContractParameters = () => ({});
+// Keeps the current editable contract id so save/book updates the same record.
+let activeDraftId = "";
 
 await bootstrap();
 applyAuthGate();
@@ -43,7 +45,9 @@ submitQuoteButton?.addEventListener("click", async () => {
     const quote = await response.json();
     quoteResult.textContent = `Anfrage ${quote.id} erstellt. Status: ${quote.status}`;
 
-    await saveDraft({
+    const saved = await saveDraft({
+      id: activeDraftId || undefined,
+      status: "booked",
       schemaVersion: "v1",
       payload: {
         quote,
@@ -51,6 +55,7 @@ submitQuoteButton?.addEventListener("click", async () => {
         quoteInput: payload
       }
     });
+    activeDraftId = saved.id || activeDraftId;
   } catch (error) {
     quoteResult.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
   }
@@ -99,13 +104,16 @@ saveDraftButton?.addEventListener("click", async () => {
 
   try {
     const payload = buildQuotePayload();
-    await saveDraft({
+    const saved = await saveDraft({
+      id: activeDraftId || undefined,
+      status: "draft",
       schemaVersion: "v1",
       payload: {
         contractParameters: payload.contractParameters,
         quoteInput: payload
       }
     });
+    activeDraftId = saved.id || activeDraftId;
     quoteResult.textContent = "Entwurf gespeichert.";
   } catch (error) {
     quoteResult.textContent = `Fehler: ${toGermanErrorMessage(error)}`;
@@ -167,6 +175,7 @@ async function bootstrap() {
   }
 
   await initializeContractSchema(initialOfferParameters);
+  activeDraftId = resumedDraft?.id || "";
   restoreAuthStatus();
 }
 
@@ -385,7 +394,7 @@ async function loadDrafts() {
   });
 
   if (!response.ok) {
-    throw new Error(await toGermanApiError(response, "Anfragen konnten nicht geladen werden"));
+    throw new Error(await toGermanApiError(response, "Verträge konnten nicht geladen werden"));
   }
 
   const drafts = await response.json();
@@ -396,7 +405,7 @@ function renderDrafts(drafts) {
   draftsList.innerHTML = "";
 
   if (!Array.isArray(drafts) || drafts.length === 0) {
-    draftsList.textContent = "Keine gespeicherten Anfragen.";
+    draftsList.textContent = "Keine gespeicherten Verträge.";
     return;
   }
 
@@ -405,7 +414,8 @@ function renderDrafts(drafts) {
     item.className = "draft-item";
 
     const label = document.createElement("div");
-    label.textContent = `${draft.id} | Besitzer: ${draft.ownerUserId}`;
+    const statusLabel = draft?.status === "booked" ? "Booked" : "Draft";
+    label.textContent = `${draft.id} | Besitzer: ${draft.ownerUserId} | Status: ${statusLabel}`;
 
     const action = document.createElement("a");
     action.className = "button-link secondary";

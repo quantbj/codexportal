@@ -108,7 +108,7 @@ h1 {
 }
 
 .layout {
-  max-width: 1120px;
+  max-width: 1320px;
   margin: -0.75rem auto 2rem;
   padding: 0 1rem;
   display: grid;
@@ -128,7 +128,7 @@ h1 {
 }
 
 .offer-layout {
-  grid-template-columns: 1fr minmax(360px, 430px);
+  grid-template-columns: minmax(520px, 1.35fr) minmax(420px, 540px);
   align-items: start;
 }
 
@@ -353,6 +353,45 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+}
+
+.contracts-subsection {
+  margin-top: 1rem;
+}
+
+.contracts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  color: #203166;
+  background: #f8faff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.contracts-table th,
+.contracts-table td {
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid #dfe6fb;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.contracts-table th {
+  background: #edf2ff;
+  font-weight: 700;
+}
+
+.contracts-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.contracts-actions-cell {
+  white-space: nowrap;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .danger-button {

@@ -39,16 +39,19 @@ npm run test:coverage
 
 ## Contracts Service Integration
 
-- Contract drafts are persisted in MongoDB when `MONGODB_URI` is set.
+- Contract drafts/contracts are persisted in MongoDB when `MONGODB_URI` is set.
 - Without `MONGODB_URI`, contracts-service falls back to `apps/contracts-service/data/drafts.json`.
 - Service URL: `http://localhost:3020`
 - Liveness endpoint: `GET /health` (process alive)
 - Readiness endpoint: `GET /ready` (persistence reachable)
 - Auth model: bearer token from `/auth/login`.
 - Public signup endpoint: `POST /auth/signup` (creates `customer` users).
+- Saved contract statuses:
+  - `draft`: created via `Entwurf speichern`
+  - `booked`: created via `Vertrag buchen`
 - Role model:
-  - `customer`: own drafts only
-  - `superuser`: all drafts
+  - `customer`: own drafts/contracts only
+  - `superuser`: all drafts/contracts
 - Admin user management endpoints (`superuser` only):
   - `GET /admin/users`
   - `POST /admin/users`

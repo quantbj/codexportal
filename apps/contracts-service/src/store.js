@@ -97,14 +97,16 @@ export class Store {
   /**
    * Creates a new draft or updates an existing draft.
    */
-  saveDraft({ id, ownerUserId, schemaVersion, payload }) {
+  saveDraft({ id, ownerUserId, schemaVersion, status, payload }) {
     const now = new Date().toISOString();
+    const nextStatus = normalizeDraftStatus(status);
 
     if (id) {
       const existing = this.drafts.find((draft) => draft.id === id);
       if (existing) {
         existing.updatedAt = now;
         existing.schemaVersion = schemaVersion || existing.schemaVersion;
+        existing.status = nextStatus || normalizeDraftStatus(existing.status);
         existing.payload = payload;
         writeJson(this.draftsFile, this.drafts);
         return existing;
@@ -115,6 +117,7 @@ export class Store {
       id: randomUUID(),
       ownerUserId,
       schemaVersion: schemaVersion || "v1",
+      status: nextStatus,
       payload,
       createdAt: now,
       updatedAt: now
@@ -130,17 +133,20 @@ export class Store {
    */
   listDraftsForUser(user) {
     if (user.role === "superuser") {
-      return [...this.drafts];
+      return this.drafts.map((draft) => withNormalizedStatus(draft));
     }
 
-    return this.drafts.filter((draft) => draft.ownerUserId === user.id);
+    return this.drafts
+      .filter((draft) => draft.ownerUserId === user.id)
+      .map((draft) => withNormalizedStatus(draft));
   }
 
   /**
    * Returns one draft by id.
    */
   getDraftById(id) {
-    return this.drafts.find((draft) => draft.id === id) || null;
+    const draft = this.drafts.find((entry) => entry.id === id);
+    return draft ? withNormalizedStatus(draft) : null;
   }
 
   /**
@@ -205,4 +211,15 @@ function validateUserInput({ username, password, role }) {
   if (!["customer", "superuser"].includes(role)) {
     throw new Error("Invalid role");
   }
+}
+
+function normalizeDraftStatus(status) {
+  return status === "booked" ? "booked" : "draft";
+}
+
+function withNormalizedStatus(draft) {
+  return {
+    ...draft,
+    status: normalizeDraftStatus(draft?.status)
+  };
 }
