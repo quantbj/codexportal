@@ -387,11 +387,56 @@ h1 {
   border-bottom: none;
 }
 
+.contracts-row-clickable {
+  cursor: pointer;
+}
+
+.contracts-row-clickable:hover {
+  background: #eef3ff;
+}
+
+.contracts-row-clickable:focus {
+  outline: 2px solid #1d3d9f;
+  outline-offset: -2px;
+}
+
 .contracts-actions-cell {
   white-space: nowrap;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(15 24 55 / 0.45);
+}
+
+.modal-card {
+  width: min(980px, 95vw);
+  max-height: 88vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.hidden {
+  display: none;
 }
 
 .danger-button {

@@ -9,6 +9,10 @@ const loadDraftsButton = document.getElementById("loadDraftsButton");
 const logoutButton = document.getElementById("logoutButton");
 const draftsList = document.getElementById("draftsList");
 const bookedList = document.getElementById("bookedList");
+const contractPreviewModal = document.getElementById("contractPreviewModal");
+const closeContractPreviewButton = document.getElementById("closeContractPreviewButton");
+const contractPreviewMeta = document.getElementById("contractPreviewMeta");
+const contractPreviewContent = document.getElementById("contractPreviewContent");
 
 await syncAdminNavVisibility();
 restoreAuthStatus();
@@ -54,6 +58,18 @@ logoutButton.addEventListener("click", async () => {
   draftsList.innerHTML = "";
   authStatus.textContent = "Nicht angemeldet.";
   await syncAdminNavVisibility();
+});
+
+closeContractPreviewButton?.addEventListener("click", closeContractPreview);
+contractPreviewModal?.addEventListener("click", (event) => {
+  if (event.target === contractPreviewModal) {
+    closeContractPreview();
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeContractPreview();
+  }
 });
 
 async function loadDrafts() {
@@ -120,7 +136,9 @@ function buildContractsTable(contracts, emptyMessage) {
   table.innerHTML = `
     <thead>
       <tr>
-        <th>ID</th>
+        <th>Vertrags-ID</th>
+        <th>Firma</th>
+        <th>Datensatz-ID</th>
         <th>Besitzer</th>
         <th>Update</th>
         <th>Aktion</th>
@@ -132,6 +150,21 @@ function buildContractsTable(contracts, emptyMessage) {
   const tbody = table.querySelector("tbody");
   for (const contract of contracts) {
     const row = document.createElement("tr");
+    row.className = "contracts-row-clickable";
+    row.tabIndex = 0;
+    row.addEventListener("click", () => openContractPreview(contract));
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openContractPreview(contract);
+      }
+    });
+
+    const contractIdCell = document.createElement("td");
+    contractIdCell.textContent = extractContractId(contract);
+
+    const companyCell = document.createElement("td");
+    companyCell.textContent = extractCompanyName(contract);
 
     const idCell = document.createElement("td");
     idCell.textContent = contract.id || "-";
@@ -149,11 +182,13 @@ function buildContractsTable(contracts, emptyMessage) {
     resume.className = "button-link secondary";
     resume.href = `./offer.html?draftId=${encodeURIComponent(contract.id)}`;
     resume.textContent = "Öffnen";
+    resume.addEventListener("click", (event) => event.stopPropagation());
 
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "danger-button";
     remove.textContent = "Löschen";
+    remove.addEventListener("click", (event) => event.stopPropagation());
     remove.addEventListener("click", async () => {
       try {
         await deleteDraft(contract.id);
@@ -165,6 +200,8 @@ function buildContractsTable(contracts, emptyMessage) {
 
     actionsCell.appendChild(resume);
     actionsCell.appendChild(remove);
+    row.appendChild(contractIdCell);
+    row.appendChild(companyCell);
     row.appendChild(idCell);
     row.appendChild(ownerCell);
     row.appendChild(updatedCell);
@@ -210,4 +247,34 @@ function formatDate(value) {
   }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("de-DE");
+}
+
+function extractContractId(contract) {
+  return String(
+    contract?.payload?.contractParameters?.offer?.contract?.contract_number
+      || contract?.payload?.quote?.id
+      || contract?.id
+      || "-"
+  );
+}
+
+function extractCompanyName(contract) {
+  return String(
+    contract?.payload?.contractParameters?.offer?.counterparty?.company_name
+      || contract?.payload?.quoteInput?.customer?.companyName
+      || "-"
+  );
+}
+
+function openContractPreview(contract) {
+  if (!contractPreviewModal || !contractPreviewContent || !contractPreviewMeta) {
+    return;
+  }
+  contractPreviewMeta.textContent = `Vertrags-ID: ${extractContractId(contract)} | Firma: ${extractCompanyName(contract)}`;
+  contractPreviewContent.textContent = JSON.stringify(contract?.payload || {}, null, 2);
+  contractPreviewModal.classList.remove("hidden");
+}
+
+function closeContractPreview() {
+  contractPreviewModal?.classList.add("hidden");
 }

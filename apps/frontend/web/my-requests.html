@@ -52,6 +52,17 @@
     </section>
   </main>
 
+  <div id="contractPreviewModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="contractPreviewTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="contractPreviewTitle">Vertragsvorschau</h2>
+        <button id="closeContractPreviewButton" type="button" class="danger-button">Schließen</button>
+      </div>
+      <p id="contractPreviewMeta" class="contract-status"></p>
+      <pre id="contractPreviewContent" class="contract-preview">{}</pre>
+    </div>
+  </div>
+
   <script type="module">
     import { syncAdminNavVisibility } from "./auth-nav.js";
     syncAdminNavVisibility();

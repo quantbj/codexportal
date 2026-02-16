@@ -71,6 +71,7 @@ Draft records persisted by `contracts-service` now include a `status`:
 - `booked`: saved via `Vertrag buchen`
 
 The frontend page `my-requests.html` is presented as `Gebuchte Verträge` and splits entries into separate `Draft` and `Booked` tables.
+Rows on `Gebuchte Verträge` are clickable and open a contract preview modal with the saved contract payload.
 
 ## Demo Users (contracts-service)
 
